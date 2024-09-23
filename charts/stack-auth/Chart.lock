@@ -2,8 +2,8 @@ dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 15.5.32
-- name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 20.1.4
-digest: sha256:e73390e7b0d2d0a99438d4ba574b7143115462fb301fcf8c3b9a0fe7e90320d9
-generated: "2024-09-23T06:48:54.19089-04:00"
+- name: svix
+  repository: file://../svix
+  version: 0.1.0
+digest: sha256:f24a2ed4528b2b76abd4f74966497dcee3262eb3dfb5155fafcbaf083eaea282
+generated: "2024-09-23T16:13:48.458748-04:00"

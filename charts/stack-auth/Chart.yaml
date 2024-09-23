@@ -11,3 +11,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
 
+  - name: svix
+    version: ^0.1.0
+    repository: file://../svix
+    condition: svix.enabled

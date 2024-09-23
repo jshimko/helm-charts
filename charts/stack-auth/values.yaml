@@ -272,3 +272,54 @@ extraTemplates:
   #     namespace: my-namespace
   #   data:
   #     key: value
+
+# svix chart
+svix:
+  enabled: true
+
+  fullnameOverride: svix
+
+  svix:
+    image:
+      repository: svix/svix-server
+      tag: latest
+      pullPolicy: Always
+
+    # automatically create a secret for the Svix API key so it can be mounted by the Stack backend
+    # (see envFrom config in backend values above)
+    createJwtSecret:
+      enabled: true
+      secretName: svix-jwt-secret
+      secretKey: STACK_SVIX_API_KEY
+
+    # https://github.com/svix/svix-webhooks/blob/main/server/svix-server/config.default.toml
+    env:
+      - name: WAIT_FOR
+        value: "true"
+      - name: SVIX_JWT_SECRET
+        value: "change me!"
+      - name: SVIX_CACHE_TYPE
+        value: "redis"
+      - name: SVIX_QUEUE_TYPE
+        value: "redis"
+      - name: SVIX_ENVIRONMENT
+        value: "prod"
+      - name: SVIX_LOG_LEVEL
+        value: "trace"
+      - name: SVIX_WHITELABEL_HEADERS
+        value: "true"
+      - name: SVIX_REDIS_POOL_MAX_SIZE
+        value: "100"
+
+    service:
+      type: LoadBalancer
+
+  postgresql:
+    enabled: true
+    architecture: standalone
+    fullnameOverride: svix-postgresql
+
+  redis:
+    enabled: true
+    architecture: standalone
+    fullnameOverride: svix-redis
