@@ -1,0 +1,18 @@
+apiVersion: v2
+name: stack-auth
+description: A Helm chart for running stack-auth on Kubernetes
+type: application
+version: 0.1.0
+
+dependencies:
+  # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/Chart.yaml
+  - name: postgresql
+    version: 15.5.32
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+
+  # https://github.com/bitnami/charts/blob/main/bitnami/redis/Chart.yaml
+  - name: redis
+    version: 20.1.4
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
