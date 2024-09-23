@@ -47,7 +47,7 @@ spec:
           env:
             {{- if .Values.postgresql.enabled  }}
             - name: STACK_DATABASE_CONNECTION_STRING
-              value: "postgresql://{{ .Values.global.postgresql.auth.username }}:{{ .Values.global.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:5432/{{ .Values.global.postgresql.auth.database }}?{{ .Values.backend.dbUrlOptions }}"
+              value: "postgresql://{{ .Values.global.postgresql.auth.username }}:{{ .Values.global.postgresql.auth.password }}@stack-postgresql:5432/{{ .Values.global.postgresql.auth.database }}?{{ .Values.backend.dbUrlOptions }}"
             - name: STACK_DIRECT_DATABASE_CONNECTION_STRING
               value: "$(STACK_DATABASE_CONNECTION_STRING)"
             {{- end }}

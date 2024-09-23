@@ -27,10 +27,10 @@ dashboard:
 
   envFrom:
     []
-    # - configMapRef:
-    #     name: my-configmap
     # - secretRef:
     #     name: my-secret
+    # - configMapRef:
+    #     name: my-configmap
 
   serviceAccount:
     # Specifies whether a service account should be created
@@ -148,10 +148,10 @@ backend:
 
   envFrom:
     []
+    # - secretRef:
+    #     name: svix-jwt-secret
     # - configMapRef:
     #     name: my-configmap
-    # - secretRef:
-    #     name: my-secret
 
   serviceAccount:
     # Specifies whether a service account should be created
@@ -252,6 +252,7 @@ backend:
 # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
 postgresql:
   enabled: true
+  fullnameOverride: stack-postgresql
 
 global:
   postgresql:
@@ -259,11 +260,6 @@ global:
       username: stack
       password: stack123
       database: stack
-
-# https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
-redis:
-  enabled: false
-  architecture: replication # "replication" or "standalone"
 
 # Misc extra K8s manifests to create
 extraTemplates:
