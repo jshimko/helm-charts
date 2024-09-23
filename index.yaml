@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   stack-auth:
   - apiVersion: v2
+    created: "2024-09-23T21:53:40.092718783Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.5.32
+    - condition: svix.enabled
+      name: svix
+      repository: file://../svix
+      version: ^0.1.0
+    description: A Helm chart for running stack-auth on Kubernetes
+    digest: e59f7ae1c5be2984b42bd10eb107f87d6dfea9e20537aa2debb0a2d453b67f14
+    name: stack-auth
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/stack-auth-0.2.1/stack-auth-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
     created: "2024-09-23T21:45:42.594798141Z"
     dependencies:
     - condition: postgresql.enabled
@@ -56,4 +74,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2024-09-23T21:45:42.78682749Z"
+generated: "2024-09-23T21:53:40.092730976Z"
