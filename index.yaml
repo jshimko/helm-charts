@@ -1,0 +1,22 @@
+apiVersion: v1
+entries:
+  stack-auth:
+  - apiVersion: v2
+    created: "2024-09-23T14:49:06.324051456Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.5.32
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.1.4
+    description: A Helm chart for running stack-auth on Kubernetes
+    digest: c306bcc309d084192c21fc835f121b8b3572e814483bb311f3b58a588ec67107
+    name: stack-auth
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/stack-auth-0.1.0/stack-auth-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-09-23T14:49:06.324060924Z"
