@@ -25,6 +25,13 @@ dashboard:
     # - name: NODE_ENV
     #   value: production
 
+  envFrom:
+    []
+    # - configMapRef:
+    #     name: my-configmap
+    # - secretRef:
+    #     name: my-secret
+
   serviceAccount:
     # Specifies whether a service account should be created
     create: true
@@ -138,6 +145,13 @@ backend:
     []
     # - name: NODE_ENV
     #   value: production
+
+  envFrom:
+    []
+    # - configMapRef:
+    #     name: my-configmap
+    # - secretRef:
+    #     name: my-secret
 
   serviceAccount:
     # Specifies whether a service account should be created

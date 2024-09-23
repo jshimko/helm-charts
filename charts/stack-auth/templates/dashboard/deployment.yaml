@@ -38,6 +38,12 @@ spec:
             - name: http
               containerPort: {{ .Values.dashboard.service.port }}
               protocol: TCP
+
+          {{- with .Values.dashboard.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
           env:
             {{- range .Values.dashboard.env }}
             - name: {{ .name }}
