@@ -1,0 +1,32 @@
+{{- if .Values.svix.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: "svix-server"
+  labels:
+    {{- include "svix.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: "svix-server"
+  minReplicas: {{ .Values.svix.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.svix.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.svix.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.svix.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.svix.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.svix.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

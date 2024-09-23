@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "svix-server"
+  labels:
+    {{- include "svix.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.svix.autoscaling.enabled }}
+  replicas: {{ .Values.svix.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "svix.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.svix.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "svix.labels" . | nindent 8 }}
+        {{- with .Values.svix.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.svix.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.svix.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ default "svix-server" .Values.svix.serviceAccount.name }}
+      containers:
+        - name: svix-server
+          image: "{{ .Values.svix.image.repository }}:{{ .Values.svix.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.svix.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.svix.service.port }}
+              protocol: TCP
+
+          {{- with .Values.svix.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          env:
+            {{- if .Values.postgresql.enabled  }}
+            - name: SVIX_DB_DSN
+              value: "postgresql://{{ .Values.global.postgresql.auth.username }}:{{ .Values.global.postgresql.auth.password }}@svix-postgresql:5432/{{ .Values.global.postgresql.auth.database }}"
+            {{- end }}
+
+            {{- if .Values.redis.enabled  }}
+            - name: SVIX_REDIS_DSN
+              value: "redis://svix-redis-master:6379"
+            - name: SVIX_QUEUE_DSN
+              value: "$(SVIX_REDIS_DSN)"
+            - name: SVIX_CACHE_DSN
+              value: "$(SVIX_REDIS_DSN)"
+            {{- end }}
+
+            {{- range .Values.svix.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+
+          securityContext:
+            {{- toYaml .Values.svix.securityContext | nindent 12 }}
+
+          {{- if .Values.svix.startupProbe }}
+          startupProbe:
+            {{- toYaml .Values.svix.startupProbe | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.svix.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.svix.livenessProbe | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.svix.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.svix.readinessProbe | nindent 12 }}
+          {{- end }}
+
+
+          resources:
+            {{- toYaml .Values.svix.resources | nindent 12 }}
+
+          {{- with .Values.svix.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+      {{- with .Values.svix.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.svix.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.svix.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.svix.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
