@@ -16,8 +16,7 @@ helm repo add jshimko https://jshimko.github.io/helm-charts
 ```
 
 If you had already added this repo earlier, run `helm repo update` to retrieve
-the latest versions. You can then run `helm search repo
-jshimko` to see the available charts.
+the latest versions.
 
 To install:
 
