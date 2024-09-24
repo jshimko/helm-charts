@@ -12,6 +12,6 @@ dependencies:
     condition: postgresql.enabled
 
   - name: svix
-    version: ^0.1.0
-    repository: file://../svix
+    version: 0.1.0
+    repository: https://jshimko.github.io/helm-charts
     condition: svix.enabled

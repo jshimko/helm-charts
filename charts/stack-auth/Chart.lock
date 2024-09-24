@@ -3,7 +3,7 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 15.5.32
 - name: svix
-  repository: file://../svix
+  repository: https://jshimko.github.io/helm-charts
   version: 0.1.0
-digest: sha256:f24a2ed4528b2b76abd4f74966497dcee3262eb3dfb5155fafcbaf083eaea282
-generated: "2024-09-23T16:13:48.458748-04:00"
+digest: sha256:341ac3e131aa8b12a1c53605e4f91d762ec25b5511324d330e34ae42a7726712
+generated: "2024-09-24T08:02:11.111938-04:00"
