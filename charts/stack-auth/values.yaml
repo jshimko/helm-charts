@@ -20,11 +20,13 @@ dashboard:
 
   imagePullSecrets: []
 
+  # -- Dashboard environment variables - see available [.env](https://github.com/stack-auth/stack/blob/dev/apps/dashboard/.env) options
   env:
     []
     # - name: NODE_ENV
     #   value: production
 
+  # -- Dashboard environment variables from secrets or configmaps
   envFrom:
     []
     # - secretRef:
@@ -80,6 +82,7 @@ dashboard:
     #    hosts:
     #      - example.com
 
+  # -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources:
     {}
     # limits:
@@ -102,6 +105,7 @@ dashboard:
     #   path: /
     #   port: http
 
+  # https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -141,11 +145,13 @@ backend:
 
   dbUrlOptions: schema=public
 
+  # -- Backend environment variables - see available [.env](https://github.com/stack-auth/stack/blob/dev/apps/backend/.env) options
   env:
     []
     # - name: NODE_ENV
     #   value: production
 
+  # -- Backend environment variables from secrets or configmaps
   envFrom:
     []
     # - secretRef:
@@ -201,6 +207,7 @@ backend:
     #    hosts:
     #      - example.com
 
+  # -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources:
     {}
     # limits:
@@ -223,6 +230,7 @@ backend:
     #   path: /
     #   port: http
 
+  # https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -230,14 +238,14 @@ backend:
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 95
 
-  # Additional volumes on the output Deployment definition.
+  # -- Additional volumes on the output Deployment definition.
   volumes: []
   # - name: foo
   #   secret:
   #     secretName: mysecret
   #     optional: false
 
-  # Additional volumeMounts on the output Deployment definition.
+  # -- Additional volumeMounts on the output Deployment definition.
   volumeMounts: []
   # - name: foo
   #   mountPath: "/etc/foo"
@@ -249,11 +257,13 @@ backend:
 
   affinity: {}
 
+# Postgres deployment for Stack Auth
 # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
 postgresql:
   enabled: true
   fullnameOverride: stack-postgresql
 
+# Postgres auth config. See docs: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
 global:
   postgresql:
     auth:
@@ -261,7 +271,7 @@ global:
       password: stack123
       database: stack
 
-# Misc extra K8s manifests to create
+# -- Any misc extra K8s manifests you'd like to create
 extraTemplates:
   []
   # - apiVersion: v1
@@ -274,6 +284,7 @@ extraTemplates:
   #     key: value
 
 # svix chart
+# Optional Svix webhooks chart deployment. See docs https://github.com/jshimko/helm-charts/tree/main/charts/svix
 svix:
   enabled: true
 
@@ -292,10 +303,8 @@ svix:
       secretName: svix-jwt-secret
       secretKey: STACK_SVIX_API_KEY
 
-    # https://github.com/svix/svix-webhooks/blob/main/server/svix-server/config.default.toml
+    # Svix server config. https://github.com/svix/svix-webhooks/blob/main/server/svix-server/config.default.toml
     env:
-      - name: WAIT_FOR
-        value: "true"
       - name: SVIX_JWT_SECRET
         value: "change me!"
       - name: SVIX_CACHE_TYPE
@@ -305,21 +314,22 @@ svix:
       - name: SVIX_ENVIRONMENT
         value: "prod"
       - name: SVIX_LOG_LEVEL
-        value: "trace"
+        value: "debug"
       - name: SVIX_WHITELABEL_HEADERS
         value: "true"
-      - name: SVIX_REDIS_POOL_MAX_SIZE
-        value: "100"
+      - name: WAIT_FOR
+        value: "true"
 
-    service:
-      type: LoadBalancer
-
+  # Postgres deployment for Svix. See docs https://github.com/bitnami/charts/tree/main/bitnami/postgresql
   postgresql:
     enabled: true
+    # -- `standalone` or `replication`
     architecture: standalone
     fullnameOverride: svix-postgresql
 
+  # Redis deployment for Svix. See docs https://github.com/bitnami/charts/tree/main/bitnami/redis
   redis:
     enabled: true
+    # -- `standalone` or `replication`
     architecture: standalone
     fullnameOverride: svix-redis
