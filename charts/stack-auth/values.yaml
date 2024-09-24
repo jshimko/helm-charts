@@ -303,22 +303,23 @@ svix:
       secretName: svix-jwt-secret
       secretKey: STACK_SVIX_API_KEY
 
-    # Svix server config. https://github.com/svix/svix-webhooks/blob/main/server/svix-server/config.default.toml
+    # -- Svix server config. See [docs](https://github.com/svix/svix-webhooks/blob/main/server/svix-server/config.default.toml)
     env:
-      - name: SVIX_JWT_SECRET
-        value: "change me!"
-      - name: SVIX_CACHE_TYPE
-        value: "redis"
-      - name: SVIX_QUEUE_TYPE
-        value: "redis"
-      - name: SVIX_ENVIRONMENT
-        value: "prod"
-      - name: SVIX_LOG_LEVEL
-        value: "debug"
-      - name: SVIX_WHITELABEL_HEADERS
-        value: "true"
-      - name: WAIT_FOR
-        value: "true"
+      []
+      # - name: SVIX_JWT_SECRET
+      #   value: "change me!"
+      # - name: SVIX_CACHE_TYPE
+      #   value: "redis"
+      # - name: SVIX_QUEUE_TYPE
+      #   value: "redis"
+      # - name: SVIX_ENVIRONMENT
+      #   value: "prod"
+      # - name: SVIX_LOG_LEVEL
+      #   value: "debug"
+      # - name: SVIX_WHITELABEL_HEADERS
+      #   value: "true"
+      # - name: WAIT_FOR
+      #   value: "true"
 
   # Postgres deployment for Svix. See docs https://github.com/bitnami/charts/tree/main/bitnami/postgresql
   postgresql:
