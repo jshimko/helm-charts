@@ -138,20 +138,7 @@ helm delete stack --namespace stack
 | svix.svix.createJwtSecret.enabled | bool | `true` |  |
 | svix.svix.createJwtSecret.secretKey | string | `"STACK_SVIX_API_KEY"` |  |
 | svix.svix.createJwtSecret.secretName | string | `"svix-jwt-secret"` |  |
-| svix.svix.env[0].name | string | `"SVIX_JWT_SECRET"` |  |
-| svix.svix.env[0].value | string | `"change me!"` |  |
-| svix.svix.env[1].name | string | `"SVIX_CACHE_TYPE"` |  |
-| svix.svix.env[1].value | string | `"redis"` |  |
-| svix.svix.env[2].name | string | `"SVIX_QUEUE_TYPE"` |  |
-| svix.svix.env[2].value | string | `"redis"` |  |
-| svix.svix.env[3].name | string | `"SVIX_ENVIRONMENT"` |  |
-| svix.svix.env[3].value | string | `"prod"` |  |
-| svix.svix.env[4].name | string | `"SVIX_LOG_LEVEL"` |  |
-| svix.svix.env[4].value | string | `"debug"` |  |
-| svix.svix.env[5].name | string | `"SVIX_WHITELABEL_HEADERS"` |  |
-| svix.svix.env[5].value | string | `"true"` |  |
-| svix.svix.env[6].name | string | `"WAIT_FOR"` |  |
-| svix.svix.env[6].value | string | `"true"` |  |
+| svix.svix.env | list | `[]` | Svix server config. See [docs](https://github.com/svix/svix-webhooks/blob/main/server/svix-server/config.default.toml) |
 | svix.svix.image.pullPolicy | string | `"Always"` |  |
 | svix.svix.image.repository | string | `"svix/svix-server"` |  |
 | svix.svix.image.tag | string | `"latest"` |  |
