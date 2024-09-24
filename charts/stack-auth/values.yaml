@@ -45,6 +45,9 @@ dashboard:
     # If not set and create is true, a name is stack-dashboard
     name: ""
 
+  # -- Deployment annotations
+  annotations: {}
+
   podAnnotations: {}
   podLabels: {}
 
@@ -169,6 +172,9 @@ backend:
     # The name of the service account to use.
     # If not set and create is true, name is stack-backend
     name: ""
+
+  # -- Deployment annotations
+  annotations: {}
 
   podAnnotations: {}
   podLabels: {}

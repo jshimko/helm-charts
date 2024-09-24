@@ -4,6 +4,10 @@ metadata:
   name: "stack-dashboard"
   labels:
     {{- include "stack-auth.dashboard.labels" . | nindent 4 }}
+  {{- with .Values.dashboard.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.dashboard.autoscaling.enabled }}
   replicas: {{ .Values.dashboard.replicaCount }}

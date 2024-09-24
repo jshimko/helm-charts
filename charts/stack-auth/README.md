@@ -42,6 +42,7 @@ helm delete stack --namespace stack
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | backend.affinity | object | `{}` |  |
+| backend.annotations | object | `{}` | Deployment annotations |
 | backend.autoscaling.enabled | bool | `false` |  |
 | backend.autoscaling.maxReplicas | int | `10` |  |
 | backend.autoscaling.minReplicas | int | `1` |  |
@@ -81,6 +82,7 @@ helm delete stack --namespace stack
 | backend.volumeMounts | list | `[]` | Additional volumeMounts on the output Deployment definition. |
 | backend.volumes | list | `[]` | Additional volumes on the output Deployment definition. |
 | dashboard.affinity | object | `{}` |  |
+| dashboard.annotations | object | `{}` | Deployment annotations |
 | dashboard.autoscaling.enabled | bool | `false` |  |
 | dashboard.autoscaling.maxReplicas | int | `10` |  |
 | dashboard.autoscaling.minReplicas | int | `1` |  |

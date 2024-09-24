@@ -4,6 +4,10 @@ metadata:
   name: "stack-backend"
   labels:
     {{- include "stack-auth.backend.labels" . | nindent 4 }}
+  {{- with .Values.backend.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.backend.autoscaling.enabled }}
   replicas: {{ .Values.backend.replicaCount }}
