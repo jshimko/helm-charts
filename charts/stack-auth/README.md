@@ -34,8 +34,8 @@ helm delete stack --namespace stack
 
 | Repository                              | Name       | Version |
 | --------------------------------------- | ---------- | ------- |
-| `https://charts.bitnami.com/bitnami`    | postgresql | 15.5.32 |
-| `https://jshimko.github.io/helm-charts` | svix       | 0.1.0   |
+| `https://charts.bitnami.com/bitnami`    | [postgresql](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) | 15.5.32 |
+| `https://jshimko.github.io/helm-charts` | [svix](../svix/)       | 0.1.0   |
 
 ## Values
 
