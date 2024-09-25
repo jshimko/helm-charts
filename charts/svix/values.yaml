@@ -26,6 +26,10 @@ svix:
     # - configMapRef:
     #     name: my-configmap
 
+  # Optional postgres connection string options.
+  # These settings are only used if using the built in postgres chart (enabled below)
+  dbUrlOptions: "" # schema=public,connect_timeout=10,pool_timeout=10
+
   # Create a k8s secret with a JWT token that an app can use to authenticate with Svix.
   # Optionally choose a custom name for the secret and the key to store the JWT in.
   # Example usage of this secret in a service that needs to access the Svix API:
