@@ -146,7 +146,12 @@ backend:
 
   imagePullSecrets: []
 
-  dbUrlOptions: "" # schema=public,connect_timeout=10,pool_timeout=10
+  # -- optional Postgres Operator cluster secret name
+  postgresSecret: ""
+
+  # -- PostgresCluster connection string options. e.g. schema=stack,connection_limit=10,connect_timeout=10,pool_timeout=10
+  # Note that the schema option must match the user name in the PostgresCluster users list below or permissions will be denied.
+  dbUrlOptions: "schema=stack&sslmode=require&application_name=stack-auth"
 
   # -- Backend environment variables - see available [.env](https://github.com/stack-auth/stack/blob/dev/apps/backend/.env) options
   env:
@@ -263,16 +268,6 @@ backend:
 
   affinity: {}
 
-# Postgres deployment for Stack Auth
-# https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
-postgresql:
-  enabled: true
-  fullnameOverride: stack-postgresql
-  auth:
-    username: stack
-    password: stack123
-    database: stack
-
 # -- Any misc extra K8s manifests you'd like to create
 extraTemplates:
   []
@@ -284,6 +279,115 @@ extraTemplates:
   #     namespace: my-namespace
   #   data:
   #     key: value
+
+# PGO PostgresCluster deployment
+# If enabled below, PostgresOperator must already be installed in the cluster so the PostgresCluster CRD is available.
+# You can install PostgresOperator to your cluster with the following command:
+
+# helm install pgo -n pgo --create-namespace oci://registry.developers.crunchydata.com/crunchydata/pgo
+#
+# Postgres Operator docs
+# https://access.crunchydata.com/documentation/postgres-operator/latest
+# https://github.com/CrunchyData/postgres-operator
+#
+# PostgresCluster Chart
+# https://github.com/jshimko/helm-charts/tree/main/charts/postgres
+postgres:
+  # -- disabled by default in case PostgresOperator is not installed in the cluster
+  enabled: false
+
+  # -- PostgresCluster name
+  name: postgres-stack
+
+  # -- Postgres users to create and assign access to databases
+  users:
+    # -- db admin
+    - name: postgres
+
+    # -- app user
+    - name: stack
+      databases:
+        - stack
+
+  # -- Postgres instances
+  instances:
+    - name: stack #
+      replicas: 2
+
+      # -- Postgres instance resources
+      resources: {}
+        # requests:
+        #   cpu: 500m
+        #   memory: 1Gi
+        # limits:
+        #   cpu: 1000m
+        #   memory: 2Gi
+
+      dataVolumeClaimSpec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 10Gi
+
+  pgBouncerReplicas: 1
+
+  # pgBackRest Backups
+  # https://pgbackrest.org/user-guide.html
+  # -- https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/backups-disaster-recovery/backups
+  pgBackRestConfig:
+    # which repo to use when triggering a manual backup
+    manual:
+      repoName: repo1 # in-cluster persistent volume
+      options:
+        - --type=full
+
+    # # S3 auth
+    # # https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/backups-disaster-recovery/backups#using-s3
+    # configuration:
+    #   - secret:
+    #       name: pgbackrest-backup-secret
+
+    global:
+      # set retention of full backups to 7 days
+      # https://pgbackrest.org/user-guide.html#retention
+
+      # in-cluster persistent volume
+      repo1-retention-full: "7"
+      repo1-retention-full-type: time
+
+      # # S3 bucket
+      # repo2-path: /pgbackrest/production
+      # repo2-retention-full: "7"
+      # repo2-retention-full-type: time
+
+    repos:
+      # in-cluster persistent volume
+      - name: repo1
+        volume:
+          volumeClaimSpec:
+            accessModes:
+              - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 10Gi
+        schedules:
+          # full backup weekly at 12:00a UTC Sunday
+          full: "0 12 * * 0"
+          # differential backup at 12:00 UTC Monday-Saturday
+          differential: "0 12 * * 1-6"
+
+      # # S3 bucket
+      # - name: repo2
+      #   s3:
+      #     bucket: example-pgbackrest-bucket
+      #     endpoint: s3.amazonaws.com
+      #     region: us-east-1
+      #   schedules:
+      #     # full backup weekly at 1:00a UTC Sunday
+      #     full: "0 1 * * 0"
+      #     # differential backup at 1:00 UTC Monday-Saturday
+      #     differential: "0 1 * * 1-6"
 
 # svix chart
 # Optional Svix webhooks chart deployment. See docs https://github.com/jshimko/helm-charts/tree/main/charts/svix

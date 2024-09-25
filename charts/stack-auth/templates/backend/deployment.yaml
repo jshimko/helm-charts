@@ -49,11 +49,35 @@ spec:
           {{- end }}
 
           env:
-            {{- if .Values.postgresql.enabled  }}
+            {{- if or .Values.postgres.enabled .Values.backend.postgresSecret }}
+            - name: PGO_PGBOUNCER_URI
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.backend.postgresSecret }}
+                  name: "{{ .Values.backend.postgresSecret }}"
+                  {{- else }}
+                  name: "{{ .Values.postgres.name }}-pguser-stack"
+                  {{- end }}
+                  key: "pgbouncer-uri"
+
+            # If we are connecting through pgbouncer we need to provide a direction connection url
+            # as well because prisma migrations do not support connection pooling
+            # https://www.prisma.io/docs/guides/performance-and-optimization/connection-management/configure-pg-bouncer#prisma-migrate-and-pgbouncer-workaround
+            - name: POSTGRES_DIRECT_URI
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.backend.postgresSecret }}
+                  name: "{{ .Values.backend.postgresSecret }}"
+                  {{- else }}
+                  name: "{{ .Values.postgres.name }}-pguser-stack"
+                  {{- end }}
+                  key: "uri"
+
+            # map above to the correct Stack env variables
             - name: STACK_DATABASE_CONNECTION_STRING
-              value: "postgres://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@stack-postgresql:5432/{{ .Values.postgresql.auth.database }}?{{ .Values.backend.dbUrlOptions }}"
+              value: "$(PGO_PGBOUNCER_URI)?{{ .Values.backend.dbUrlOptions }}&pgbouncer=true"
             - name: STACK_DIRECT_DATABASE_CONNECTION_STRING
-              value: "$(STACK_DATABASE_CONNECTION_STRING)"
+              value: "$(POSTGRES_DIRECT_URI)?{{ .Values.backend.dbUrlOptions }}"
             {{- end }}
 
             {{- range .Values.backend.env }}
