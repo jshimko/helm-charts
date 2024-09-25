@@ -146,7 +146,7 @@ backend:
 
   imagePullSecrets: []
 
-  dbUrlOptions: "" # schema=public
+  dbUrlOptions: "" # schema=public,connect_timeout=10,pool_timeout=10
 
   # -- Backend environment variables - see available [.env](https://github.com/stack-auth/stack/blob/dev/apps/backend/.env) options
   env:
