@@ -1,9 +1,9 @@
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 15.5.32
+  version: 15.5.34
 - name: svix
   repository: https://jshimko.github.io/helm-charts
-  version: 0.3.1
-digest: sha256:c7dcd659d1943a7d13e9095b60dd3255ab4db0b82761fd208d11d781db970c45
-generated: "2024-09-25T09:46:01.093987-04:00"
+  version: 0.4.0
+digest: sha256:d25875894682cde55d177e07220a9477ac04f3b1f07840e8f8e0d67eb94b010f
+generated: "2024-09-25T11:14:33.848213-04:00"
