@@ -16,5 +16,5 @@ dependencies:
   # https://github.com/jshimko/helm-charts/tree/main/charts/svix
   - name: svix
     version: 0.5.0
-    repository: file://../svix
+    repository: https://jshimko.github.io/helm-charts
     condition: svix.enabled
