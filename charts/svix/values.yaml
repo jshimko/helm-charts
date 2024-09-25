@@ -142,12 +142,10 @@ postgresql:
   architecture: standalone # "replication" or "standalone"
   fullnameOverride: svix-postgresql
 
-global:
-  postgresql:
-    auth:
-      username: svix
-      password: svix123
-      database: svix
+  auth:
+    username: svix
+    password: svix123
+    database: svix
 
 # Redis
 # https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
