@@ -36,6 +36,7 @@ svix:
     enabled: false
     secretName: svix-jwt
     secretKey: SVIX_API_KEY
+    annotations: {}
 
   # Create a service account for the Svix server deployment.
   serviceAccount:
