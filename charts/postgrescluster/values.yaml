@@ -1,7 +1,7 @@
 ---
 # For a full explanation of how to set up the custom resource, please refer to
 # the documentation:
-#    https://access.crunchydata.com/documentation/postgres-operator/v5/
+#    https://access.crunchydata.com/documentation/postgres-operator/latest/
 
 ###########
 # General #
@@ -10,6 +10,10 @@
 # name is the name of the cluster. This defaults to the name of the Helm
 # release.
 # name: hippo
+
+# PostgresCluster annotations
+# annotations:
+#   postgres-operator.crunchydata.com/autoCreateUserSchema: "true"
 
 # postgresVersion sets the version to deploy. This version number needs to be
 # available as one of the "RELATED_IMAGE_POSTGRES_..." images as part of the PGO
@@ -98,7 +102,9 @@ postgresVersion: 16
 # Advanced Postgres Settings #
 ##############################
 
-# instances allows you to define one or more Postgres instance sets. By default,
+# Instances
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecinstancesindex
+# The instances config allows you to define one or more Postgres instance sets. By default,
 # PGO will only deploy a single instance. Each instance set has similar
 # characteristics to the other instances in the set, e.g. storage size, resource
 # etc. You can have multiple replicas within an instance set.
@@ -130,13 +136,16 @@ postgresVersion: 16
 #     postgresql:
 #       parameters:
 #         synchronous_commit: "on"
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecpatroni
 # patroni: {}
 
 # users sets any custom Postgres users and databases that they have  access to
 # as well as any permissions associated with the user account.
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecusersindex
 # users: {}
 
 # dataSource specifies a data source for bootstrapping a Postgres cluster.
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecdatasource
 # dataSource: {}
 
 # customTLSSecret references a Secret that contains the relevant information for
@@ -259,6 +268,7 @@ postgresVersion: 16
 
 # pgBackRestConfig allows for the configuration of every pgBackRest option
 # except for "image", which is set by "pgBackRest".
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecbackupspgbackrest
 # pgBackRestConfig: {}
 
 ################################
@@ -267,6 +277,7 @@ postgresVersion: 16
 
 # pgBouncerConfig sets all of the pgBouncer portions of the spec except for
 # image. To set image, you need to set the "pgBouncer" setting.
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecproxypgbouncer
 # pgBouncerConfig: {}
 
 #######################
@@ -276,6 +287,7 @@ postgresVersion: 16
 # monitoringConfig sets all of the monitoring portions of the spec except for the
 # image. To set the image, which also enables monitoring, you need to set the
 # "monitoring" setting.
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecmonitoring
 # monitoringConfig: {}
 
 #######################

@@ -1,10 +1,13 @@
+# CRD reference:
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
   name: {{ default .Release.Name .Values.name }}
+  {{ with .Values.annotations }}
   annotations:
-    # https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/basic-setup/user-management#automatically-creating-per-user-schemas
-    postgres-operator.crunchydata.com/autoCreateUserSchema: "true"
+{{ toYaml . | indent 4 }}
+  {{ end }}
 spec:
   postgresVersion: {{ required "You must set the version of Postgres to deploy." .Values.postgresVersion }}
   {{- if .Values.postGISVersion }}
