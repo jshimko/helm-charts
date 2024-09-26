@@ -49,14 +49,14 @@ spec:
           {{- end }}
 
           env:
-            {{- if or .Values.postgres.enabled .Values.backend.postgresSecret }}
+            {{- if or .Values.postgrescluster.enabled .Values.backend.postgresClusterSecret }}
             - name: PGO_PGBOUNCER_URI
               valueFrom:
                 secretKeyRef:
-                  {{- if .Values.backend.postgresSecret }}
-                  name: "{{ .Values.backend.postgresSecret }}"
+                  {{- if .Values.backend.postgresClusterSecret }}
+                  name: "{{ .Values.backend.postgresClusterSecret }}"
                   {{- else }}
-                  name: "{{ .Values.postgres.name }}-pguser-stack"
+                  name: "{{ .Values.postgrescluster.name }}-pguser-stack"
                   {{- end }}
                   key: "pgbouncer-uri"
 
@@ -66,10 +66,10 @@ spec:
             - name: POSTGRES_DIRECT_URI
               valueFrom:
                 secretKeyRef:
-                  {{- if .Values.backend.postgresSecret }}
-                  name: "{{ .Values.backend.postgresSecret }}"
+                  {{- if .Values.backend.postgresClusterSecret }}
+                  name: "{{ .Values.backend.postgresClusterSecret }}"
                   {{- else }}
-                  name: "{{ .Values.postgres.name }}-pguser-stack"
+                  name: "{{ .Values.postgrescluster.name }}-pguser-stack"
                   {{- end }}
                   key: "uri"
 

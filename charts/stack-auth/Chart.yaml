@@ -2,15 +2,15 @@ apiVersion: v2
 name: stack-auth
 description: A Helm chart to deploy the Stack Auth platform. https://stack-auth.com
 type: application
-version: 0.7.0
+version: 0.8.0
 
 dependencies:
   # Postgres Operator - PostgresCluster
-  # https://access.crunchydata.com/documentation/postgres-operator/v5/
-  - name: postgres
-    version: 5.6.0
+  # https://access.crunchydata.com/documentation/postgres-operator/latest/
+  - name: postgrescluster
+    version: 5.6.1
     repository: file://../postgrescluster
-    condition: postgres.enabled
+    condition: postgrescluster.enabled
 
   # Svix webhooks
   # https://github.com/jshimko/helm-charts/tree/main/charts/svix

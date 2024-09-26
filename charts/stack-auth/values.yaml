@@ -146,11 +146,11 @@ backend:
 
   imagePullSecrets: []
 
-  # -- optional Postgres Operator cluster secret name
-  postgresSecret: ""
+  # -- optional Postgres Operator cluster secret name. This is useful if you deploy a PostgresCluster instance outside of this chart.
+  postgresClusterSecret: ""
 
+  # Note that the schema option below must match the user name in the PostgresCluster users list or database permissions will be denied until manually granted.
   # -- PostgresCluster connection string options. e.g. schema=stack,connection_limit=10,connect_timeout=10,pool_timeout=10
-  # Note that the schema option must match the user name in the PostgresCluster users list below or permissions will be denied.
   dbUrlOptions: "schema=stack&sslmode=require&application_name=stack-auth"
 
   # -- Backend environment variables - see available [.env](https://github.com/stack-auth/stack/blob/dev/apps/backend/.env) options
@@ -291,13 +291,17 @@ extraTemplates:
 # https://github.com/CrunchyData/postgres-operator
 #
 # PostgresCluster Chart
-# https://github.com/jshimko/helm-charts/tree/main/charts/postgres
-postgres:
+# https://github.com/jshimko/helm-charts/tree/main/charts/postgrescluster
+postgrescluster:
   # -- disabled by default in case PostgresOperator is not installed in the cluster
   enabled: false
 
   # -- PostgresCluster name
   name: postgres-stack
+
+  # -- PostgresCluster annotations
+  annotations: {}
+    # postgres-operator.crunchydata.com/autoCreateUserSchema: "true"
 
   # -- Postgres users to create and assign access to databases
   users:
@@ -311,8 +315,8 @@ postgres:
 
   # -- Postgres instances
   instances:
-    - name: stack #
-      replicas: 2
+    - name: stack
+      replicas: 1
 
       # -- Postgres instance resources
       resources: {}
