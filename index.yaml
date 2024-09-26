@@ -12,7 +12,37 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/postgres-5.6.0/postgres-5.6.0.tgz
     version: 5.6.0
+  postgrescluster:
+  - apiVersion: v2
+    appVersion: 5.6.1
+    created: "2024-09-26T13:20:50.669560985Z"
+    description: A Helm chart for deploying a PostgresCluster instance using Crunchy
+      Postgres Operator. https://access.crunchydata.com/documentation/postgres-operator/latest
+    digest: 18ca2efcead6fd934ee557d857e8993dc344edb7556dc6b92773156bc4e7dd41
+    name: postgrescluster
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/postgrescluster-5.6.1/postgrescluster-5.6.1.tgz
+    version: 5.6.1
   stack-auth:
+  - apiVersion: v2
+    created: "2024-09-26T13:20:50.81219005Z"
+    dependencies:
+    - condition: postgrescluster.enabled
+      name: postgrescluster
+      repository: file://../postgrescluster
+      version: 5.6.1
+    - condition: svix.enabled
+      name: svix
+      repository: https://jshimko.github.io/helm-charts
+      version: 0.5.0
+    description: A Helm chart to deploy the Stack Auth platform. https://stack-auth.com
+    digest: bc69afe99afc11364f29d5afcc9d1318184832e398e8ebca6b91e1be7aa804fb
+    name: stack-auth
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/stack-auth-0.8.0/stack-auth-0.8.0.tgz
+    version: 0.8.0
   - apiVersion: v2
     created: "2024-09-25T21:11:56.104140971Z"
     dependencies:
@@ -231,6 +261,24 @@ entries:
     version: 0.1.0
   svix:
   - apiVersion: v2
+    created: "2024-09-26T13:20:50.963016435Z"
+    dependencies:
+    - condition: postgrescluster.enabled
+      name: postgrescluster
+      repository: file://../postgrescluster
+      version: 5.6.1
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.1.4
+    description: A Helm chart for running svix on Kubernetes
+    digest: 3e6d0dc62cc76b4fa26a0f05df2367d5417052f4f804406fd705c1b0efaf3e23
+    name: svix
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/svix-0.6.0/svix-0.6.0.tgz
+    version: 0.6.0
+  - apiVersion: v2
     created: "2024-09-25T21:10:28.825629142Z"
     dependencies:
     - condition: postgresql.enabled
@@ -356,4 +404,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2024-09-25T21:11:56.104217225Z"
+generated: "2024-09-26T13:20:50.963107505Z"
