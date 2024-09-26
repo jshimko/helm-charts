@@ -45,19 +45,7 @@ spec:
           {{- end }}
 
           env:
-            {{- if .Values.postgresql.enabled  }}
-            - name: SVIX_DB_DSN
-              value: "postgres://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@svix-postgresql:5432/{{ .Values.postgresql.auth.database }}?{{ .Values.svix.dbUrlOptions }}"
-            {{- end }}
-
-            {{- if .Values.redis.enabled  }}
-            - name: SVIX_REDIS_DSN
-              value: "redis://svix-redis-master:6379"
-            - name: SVIX_QUEUE_DSN
-              value: "$(SVIX_REDIS_DSN)"
-            - name: SVIX_CACHE_DSN
-              value: "$(SVIX_REDIS_DSN)"
-            {{- end }}
+            {{- include "svix.dbEnv" . | nindent 12 }}
 
             {{- range .Values.svix.env }}
             - name: {{ .name }}

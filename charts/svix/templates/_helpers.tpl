@@ -49,3 +49,31 @@ Selector labels
 app.kubernetes.io/name: "svix-server"
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Common postgres/redis env
+*/}}
+{{- define "svix.dbEnv" -}}
+# postgres
+{{- if or .Values.postgrescluster.enabled .Values.svix.postgresClusterSecret }}
+- name: SVIX_DB_DSN
+  valueFrom:
+    secretKeyRef:
+      {{- if .Values.svix.postgresClusterSecret }}
+      name: "{{ .Values.svix.postgresClusterSecret }}"
+      {{- else }}
+      name: "{{ .Values.postgrescluster.name }}-pguser-svix"
+      {{- end }}
+      key: "pgbouncer-uri"
+{{- end }}
+
+# redis
+{{- if .Values.redis.enabled  }}
+- name: SVIX_REDIS_DSN
+  value: "redis://{{ .Values.redis.fullnameOverride }}-master:6379"
+- name: SVIX_QUEUE_DSN
+  value: "$(SVIX_REDIS_DSN)"
+- name: SVIX_CACHE_DSN
+  value: "$(SVIX_REDIS_DSN)"
+{{- end }}
+{{- end }}
