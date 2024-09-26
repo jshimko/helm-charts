@@ -1,6 +1,6 @@
 # Stack Auth
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.8.1](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart to deploy the Stack Auth platform. <https://stack-auth.com>
 
@@ -34,8 +34,8 @@ helm delete stack --namespace stack
 
 | Repository                              | Name       | Version |
 | --------------------------------------- | ---------- | ------- |
-| `https://charts.bitnami.com/bitnami`    | [postgresql](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) | 15.5.32 |
-| `https://jshimko.github.io/helm-charts` | [svix](../svix/)       | 0.1.0   |
+| `https://jshimko.github.io/helm-charts` | [postgrescluster](../postgrescluster/) | 5.6.1 |
+| `https://jshimko.github.io/helm-charts` | [svix](../svix/) | 0.6.0 |
 
 ## Values
 
@@ -48,7 +48,7 @@ helm delete stack --namespace stack
 | backend.autoscaling.minReplicas | int | `1` |  |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | backend.autoscaling.targetMemoryUtilizationPercentage | int | `95` |  |
-| backend.dbUrlOptions | string | `"schema=public"` |  |
+| backend.dbUrlOptions | string | `"schema=stack&sslmode=require&application_name=stack-auth"` | PostgresCluster connection string options. e.g. schema=stack,connection_limit=10,connect_timeout=10,pool_timeout=10 |
 | backend.env | list | `[]` | Backend environment variables - see available [.env](https://github.com/stack-auth/stack/blob/dev/apps/backend/.env) options |
 | backend.envFrom | list | `[]` | Backend environment variables from secrets or configmaps |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
@@ -56,7 +56,7 @@ helm delete stack --namespace stack
 | backend.image.tag | string | `"dev"` |  |
 | backend.imagePullSecrets | list | `[]` |  |
 | backend.ingress.annotations | object | `{}` |  |
-| backend.ingress.className | string | `""` |  |
+| backend.ingress.className | string | `"nginx"` |  |
 | backend.ingress.enabled | bool | `false` |  |
 | backend.ingress.hosts[0].host | string | `"example.com"` |  |
 | backend.ingress.hosts[0].paths[0].path | string | `"/"` |  |
@@ -67,6 +67,7 @@ helm delete stack --namespace stack
 | backend.podAnnotations | object | `{}` |  |
 | backend.podLabels | object | `{}` |  |
 | backend.podSecurityContext | object | `{}` |  |
+| backend.postgresClusterSecret | string | `""` | optional Postgres Operator cluster secret name. This is useful if you deploy a PostgresCluster instance outside of this chart. |
 | backend.readinessProbe | string | `nil` |  |
 | backend.replicaCount | int | `1` |  |
 | backend.resources | object | `{}` | <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/> |
@@ -95,7 +96,7 @@ helm delete stack --namespace stack
 | dashboard.image.tag | string | `"dev"` |  |
 | dashboard.imagePullSecrets | list | `[]` |  |
 | dashboard.ingress.annotations | object | `{}` |  |
-| dashboard.ingress.className | string | `""` |  |
+| dashboard.ingress.className | string | `"nginx"` |  |
 | dashboard.ingress.enabled | bool | `false` |  |
 | dashboard.ingress.hosts[0].host | string | `"example.com"` |  |
 | dashboard.ingress.hosts[0].paths[0].path | string | `"/"` |  |
@@ -122,13 +123,18 @@ helm delete stack --namespace stack
 | dashboard.volumes | list | `[]` |  |
 | extraTemplates | list | `[]` | Any misc extra K8s manifests you'd like to create |
 | fullnameOverride | string | `""` |  |
-| global.postgresql.auth.database | string | `"stack"` |  |
-| global.postgresql.auth.password | string | `"stack123"` |  |
-| global.postgresql.auth.username | string | `"stack"` |  |
 | manageNamespace.enabled | bool | `false` |  |
 | nameOverride | string | `""` |  |
-| postgresql.enabled | bool | `true` |  |
-| postgresql.fullnameOverride | string | `"stack-postgresql"` |  |
+| postgrescluster.annotations | object | `{}` | PostgresCluster annotations |
+| postgrescluster.enabled | bool | `false` | disabled by default in case PostgresOperator is not installed in the cluster |
+| postgrescluster.instances | list | `[{"dataVolumeClaimSpec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"10Gi"}}},"name":"stack","replicas":1,"resources":{}}]` | Postgres instances |
+| postgrescluster.instances[0].resources | object | `{}` | Postgres instance resources |
+| postgrescluster.name | string | `"postgres-stack"` | PostgresCluster name |
+| postgrescluster.pgBackRestConfig | object | `{"global":{"repo1-retention-full":"7","repo1-retention-full-type":"time"},"manual":{"options":["--type=full"],"repoName":"repo1"},"repos":[{"name":"repo1","schedules":{"differential":"0 12 * * 1-6","full":"0 12 * * 0"},"volume":{"volumeClaimSpec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"10Gi"}}}}}]}` | <https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/backups-disaster-recovery/backups> |
+| postgrescluster.pgBouncerReplicas | int | `1` |  |
+| postgrescluster.users | list | `[{"name":"postgres"},{"databases":["stack"],"name":"stack"}]` | Postgres users to create and assign access to databases |
+| postgrescluster.users[0] | object | `{"name":"postgres"}` | db admin |
+| postgrescluster.users[1] | object | `{"databases":["stack"],"name":"stack"}` | app user |
 | svix.enabled | bool | `true` |  |
 | svix.fullnameOverride | string | `"svix"` |  |
 | svix.postgresql.architecture | string | `"standalone"` | `standalone` or `replication` |
