@@ -71,8 +71,14 @@ Common postgres/redis env
 {{- if .Values.redis.enabled  }}
 - name: SVIX_REDIS_DSN
   value: "redis://{{ .Values.redis.fullnameOverride }}-master:6379"
+
+- name: SVIX_QUEUE_TYPE
+  value: "redis"
 - name: SVIX_QUEUE_DSN
   value: "$(SVIX_REDIS_DSN)"
+
+- name: SVIX_CACHE_TYPE
+  value: "redis"
 - name: SVIX_CACHE_DSN
   value: "$(SVIX_REDIS_DSN)"
 {{- end }}
