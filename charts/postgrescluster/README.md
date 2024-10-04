@@ -22,7 +22,7 @@ Original source of this chart:
 
 ## Usage
 
-Add this chart repository:
+Add this chart repository if you haven't already:
 
 ```sh
 helm repo add jshimko https://jshimko.github.io/helm-charts
