@@ -2,13 +2,13 @@ apiVersion: v2
 name: svix
 description: A Helm chart for running svix on Kubernetes
 type: application
-version: 0.6.2
+version: 0.6.3
 
 dependencies:
   # Postgres Operator - PostgresCluster
   # https://access.crunchydata.com/documentation/postgres-operator/latest/
   - name: postgrescluster
-    version: 5.6.1
+    version: 5.6.2
     repository: https://jshimko.github.io/helm-charts
     condition: postgrescluster.enabled
 
