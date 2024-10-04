@@ -13,7 +13,7 @@
 
 # PostgresCluster annotations
 # annotations:
-#   postgres-operator.crunchydata.com/autoCreateUserSchema: "true"
+#   postgres-operator.crunchydata.com/someFeature: "true"
 
 # postgresVersion sets the version to deploy. This version number needs to be
 # available as one of the "RELATED_IMAGE_POSTGRES_..." images as part of the PGO
@@ -143,6 +143,10 @@ postgresVersion: 16
 # as well as any permissions associated with the user account.
 # https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecusersindex
 # users: {}
+#
+# optionally create a user schema and grant permissions for the application user on their configured databases.
+# https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/basic-setup/user-management#automatically-creating-per-user-schemas
+# autoCreateUserSchema: true
 
 # dataSource specifies a data source for bootstrapping a Postgres cluster.
 # https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster#postgresclusterspecdatasource

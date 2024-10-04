@@ -35,8 +35,10 @@ If you haven't already installed the PGO chart in your cluster, you will need to
 helm install pgo -n pgo jshimko/pgo --set features.AutoCreateUserSchema=true
 ```
 
+Note that we are installing the PGO chart above with the `AutoCreateUserSchema` feature flag enabled ([more info](https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/basic-setup/user-management#automatically-creating-per-user-schemas)). This is recommended so you don't have to manually create a user schema and grant permissions for your application user. If you choose not to enable this, you will need to manually grant the necessary permissions for your application user to access the database.
+
 To deploy a `PostgresCluster` instance:
 
 ```sh
-helm install my-pg-cluster -n my-namespace -f my-values.yaml jshimko/postgrescluster
+helm install my-pg-cluster -n my-namespace -f my-values.yaml jshimko/postgrescluster --set autoCreateUserSchema=true
 ```

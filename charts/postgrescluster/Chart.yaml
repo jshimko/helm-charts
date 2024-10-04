@@ -3,5 +3,5 @@ name: postgrescluster
 description: A Helm chart for deploying a PostgresCluster instance using Crunchy Postgres Operator. https://access.crunchydata.com/documentation/postgres-operator/latest
 type: application
 # The version below should match the version on the PostgresCluster CRD
-version: 5.6.1
+version: 5.6.2
 appVersion: 5.6.1
