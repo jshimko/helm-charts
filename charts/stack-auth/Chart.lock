@@ -1,9 +1,9 @@
 dependencies:
 - name: postgrescluster
   repository: https://jshimko.github.io/helm-charts
-  version: 5.6.1
+  version: 5.6.2
 - name: svix
   repository: https://jshimko.github.io/helm-charts
-  version: 0.6.1
-digest: sha256:ce30e6bf11aa4022ccdd2d4e28261dc8a4f61c180885a7b81938d6e0e88ba338
-generated: "2024-10-04T12:03:05.031595-04:00"
+  version: 0.6.3
+digest: sha256:b4861dfccd010458c28e5a357c226d6b7a3dc641a14bd3d503b5dc0e345706a1
+generated: "2024-10-04T12:11:48.367564-04:00"
