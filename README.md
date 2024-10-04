@@ -2,25 +2,21 @@
 
 This repository contains [Helm](https://helm.sh/) charts for various open source applications and services. To learn more, please see the readme for each available chart.
 
+- [Crunchy Postgres Operator](./charts/pgo/) - See also <https://access.crunchydata.com/documentation/postgres-operator/latest>
+- [PostgresCluster](./charts/postgrescluster/) - See also <https://access.crunchydata.com/documentation/postgres-operator/latest>
 - [Stack Auth](./charts/stack-auth/) - See also <https://stack-auth.com>
 - [Svix Webhooks](./charts/svix/) - See also <https://www.svix.com>
 
 ## Usage
 
-[Helm](https://helm.sh) must be installed to use this chart. Please refer to
-Helm's [documentation](https://helm.sh/docs) to get started.
-
-Add this repo as follows:
+Add this chart repository:
 
 ```sh
 helm repo add jshimko https://jshimko.github.io/helm-charts
+helm repo update
 ```
 
-If you had already added this repo earlier, run `helm repo update` to retrieve
-the latest versions. You can then run `helm search repo
-jshimko` to see the available charts.
-
-To install a chart:
+To install any chart in this repository:
 
 ```sh
 helm install my-release -n my-namespace jshimko/chart-name

@@ -2,11 +2,15 @@
 
 This chart is used to deploy a `PostgresCluster` instance using [Crunchy Postgres Operator](https://access.crunchydata.com/documentation/postgres-operator/latest).
 
-This chart is just a copy of their example chart. It is only copied here so that it is available in our Helm repository (the official chart is not published anywhere and requires a git clone).
+This chart is just a copy of [their official example chart](https://github.com/CrunchyData/postgres-operator-examples/tree/main/helm/postgres). It is only copied here so that it is published in a Helm repository (the official chart is not published anywhere and requires a manual git clone).
 
 Docs:
 
 <https://access.crunchydata.com/documentation/postgres-operator/latest/>
+
+Full `PostgresCluster` CRD reference (all of these configs are available in the values of this chart):
+
+<https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster>
 
 Examples Repo:
 
@@ -16,6 +20,23 @@ Original source of this chart:
 
 <https://github.com/CrunchyData/postgres-operator-examples/tree/main/helm/postgres>
 
-Full `PostgresCluster` CRD reference (all of these configs are available in the chart values):
+## Usage
 
-<https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster>
+Add this chart repository:
+
+```sh
+helm repo add jshimko https://jshimko.github.io/helm-charts
+helm repo update
+```
+
+If you haven't already installed the PGO chart in your cluster, you will need to do that first so the `PostgresCluster` CRD is available.
+
+```sh
+helm install pgo -n pgo jshimko/pgo --set features.AutoCreateUserSchema=true
+```
+
+To deploy a `PostgresCluster` instance:
+
+```sh
+helm install my-pg-cluster -n my-namespace -f my-values.yaml jshimko/postgrescluster
+```

@@ -9,14 +9,12 @@ A Helm chart to deploy the Svix open source webhooks service. <https://www.svix.
 [Helm](https://helm.sh) must be installed to use this chart. Please refer to
 Helm's [documentation](https://helm.sh/docs) to get started.
 
-Add this repo as follows:
+Add this chart repository if you haven't already:
 
 ```sh
 helm repo add jshimko https://jshimko.github.io/helm-charts
+helm repo update
 ```
-
-If you had already added this repo earlier, run `helm repo update` to retrieve
-the latest versions.
 
 To install:
 
