@@ -49,6 +49,24 @@ entries:
     version: 5.6.1
   stack-auth:
   - apiVersion: v2
+    created: "2024-10-05T13:02:50.214022938Z"
+    dependencies:
+    - condition: postgrescluster.enabled
+      name: postgrescluster
+      repository: https://jshimko.github.io/helm-charts
+      version: 5.6.2
+    - condition: svix.enabled
+      name: svix
+      repository: https://jshimko.github.io/helm-charts
+      version: 0.7.0
+    description: A Helm chart to deploy the Stack Auth platform. https://stack-auth.com
+    digest: 7b16a3d9cc0fa827538c1ca3913e7b98190047e5d9c7cfbafbd19596f11a6097
+    name: stack-auth
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/stack-auth-0.9.0/stack-auth-0.9.0.tgz
+    version: 0.9.0
+  - apiVersion: v2
     created: "2024-10-04T16:13:32.086471974Z"
     dependencies:
     - condition: postgrescluster.enabled
@@ -571,4 +589,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-05T12:59:40.944269793Z"
+generated: "2024-10-05T13:02:50.214164804Z"
