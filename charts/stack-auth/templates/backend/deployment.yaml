@@ -80,9 +80,8 @@ spec:
               value: "$(POSTGRES_DIRECT_URI)?{{ .Values.backend.dbUrlOptions }}"
             {{- end }}
 
-            {{- range .Values.backend.env }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.backend.env }}
+            {{- toYaml . | nindent 12 }}
             {{- end }}
 
           securityContext:
