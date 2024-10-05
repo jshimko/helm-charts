@@ -47,9 +47,8 @@ spec:
           env:
             {{- include "svix.dbEnv" . | nindent 12 }}
 
-            {{- range .Values.svix.env }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.svix.env }}
+            {{- toYaml . | nindent 12 }}
             {{- end }}
 
           securityContext:
