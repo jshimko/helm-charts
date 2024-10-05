@@ -4,6 +4,6 @@ dependencies:
   version: 5.6.2
 - name: svix
   repository: https://jshimko.github.io/helm-charts
-  version: 0.6.3
-digest: sha256:b4861dfccd010458c28e5a357c226d6b7a3dc641a14bd3d503b5dc0e345706a1
-generated: "2024-10-04T12:11:48.367564-04:00"
+  version: 0.7.0
+digest: sha256:94790ef5ae3604047b39b29317dc4b412a099cb3797f92940f10eca330e7e357
+generated: "2024-10-05T09:01:41.489572-04:00"
