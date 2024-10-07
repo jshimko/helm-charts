@@ -36,8 +36,8 @@ spec:
         {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
       containers:
         - name: stack-backend
-          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          image: "{{ .Values.backend.image }}"
+          imagePullPolicy: {{ .Values.backend.imagePullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.backend.service.port }}

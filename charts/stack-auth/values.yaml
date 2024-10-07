@@ -13,10 +13,8 @@ manageNamespace:
 dashboard:
   replicaCount: 1
 
-  image:
-    repository: jshimko/stack-dashboard
-    pullPolicy: IfNotPresent
-    tag: dev
+  image: jshimko/stack-dashboard:latest
+  imagePullPolicy: IfNotPresent
 
   imagePullSecrets: []
 
@@ -139,10 +137,8 @@ dashboard:
 backend:
   replicaCount: 1
 
-  image:
-    repository: jshimko/stack-backend
-    pullPolicy: IfNotPresent
-    tag: dev
+  image: jshimko/stack-backend:latest
+  imagePullPolicy: IfNotPresent
 
   imagePullSecrets: []
 

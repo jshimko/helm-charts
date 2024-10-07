@@ -36,8 +36,8 @@ spec:
         {{- toYaml .Values.dashboard.podSecurityContext | nindent 8 }}
       containers:
         - name: stack-dashboard
-          image: "{{ .Values.dashboard.image.repository }}:{{ .Values.dashboard.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.dashboard.image.pullPolicy }}
+          image: "{{ .Values.dashboard.image }}"
+          imagePullPolicy: {{ .Values.dashboard.imagePullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.dashboard.service.port }}
