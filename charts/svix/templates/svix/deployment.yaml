@@ -32,8 +32,8 @@ spec:
       serviceAccountName: {{ default "svix-server" .Values.svix.serviceAccount.name }}
       containers:
         - name: svix-server
-          image: "{{ .Values.svix.image.repository }}:{{ .Values.svix.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.svix.image.pullPolicy }}
+          image: "{{ .Values.svix.image }}"
+          imagePullPolicy: {{ .Values.svix.imagePullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.svix.service.port }}

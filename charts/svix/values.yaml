@@ -7,10 +7,8 @@ fullnameOverride: ""
 svix:
   replicaCount: 1
 
-  image:
-    repository: svix/svix-server
-    pullPolicy: Always
-    tag: latest
+  image: svix/svix-server:latest
+  imagePullPolicy: IfNotPresent
 
   imagePullSecrets: []
 
