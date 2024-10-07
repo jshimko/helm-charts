@@ -374,6 +374,24 @@ entries:
     version: 0.1.0
   svix:
   - apiVersion: v2
+    created: "2024-10-07T14:32:28.912345365Z"
+    dependencies:
+    - condition: postgrescluster.enabled
+      name: postgrescluster
+      repository: https://jshimko.github.io/helm-charts
+      version: 5.6.2
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.1.7
+    description: A Helm chart for running svix on Kubernetes
+    digest: 944084a8d9cb92a3c23e14de1872b9532de2fb48977a2da2b069c9e04026b573
+    name: svix
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/svix-0.8.0/svix-0.8.0.tgz
+    version: 0.8.0
+  - apiVersion: v2
     created: "2024-10-05T12:59:40.944188259Z"
     dependencies:
     - condition: postgrescluster.enabled
@@ -589,4 +607,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-05T13:02:50.214164804Z"
+generated: "2024-10-07T14:32:28.912523527Z"
