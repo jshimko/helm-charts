@@ -64,8 +64,9 @@ resources:
 # customPodLabels:
 #  example.com: custom-label
 
-# Enable feature gates for PGO, by explicitly seting the value for the flags
+# Enable feature gates for PGO, by explicitly setting the value for the flags
 # features:
+#   AutoCreateUserSchema: true
 #   AutoGrowVolumes: true
 #   Feature2: false
 #   Feature3: somevalue
