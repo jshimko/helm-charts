@@ -1,6 +1,6 @@
 # Svix Webhooks
 
-![Version: 0.6.0](https://img.shields.io/badge/Version-0.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.9.0](https://img.shields.io/badge/Version-0.9.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart to deploy the Svix open source webhooks service. <https://www.svix.com>
 
@@ -32,7 +32,7 @@ helm delete svix --namespace svix
 
 | Repository                              | Name       | Version |
 | --------------------------------------- | ---------- | ------- |
-| `https://jshimko.github.io/helm-charts` | [postgrescluster](../postgrescluster/) | 5.6.1 |
+| `https://jshimko.github.io/helm-charts` | [postgrescluster](../postgrescluster/) | 5.8.2 |
 
 ## Values
 
