@@ -2,6 +2,17 @@ apiVersion: v1
 entries:
   pgo:
   - apiVersion: v2
+    appVersion: 5.8.2
+    created: "2025-06-17T11:54:35.551705023Z"
+    description: Installer for PGO, the open source Postgres Operator from Crunchy
+      Data. https://access.crunchydata.com/documentation/postgres-operator/latest
+    digest: 0ee625402cfd09b01db2d6990b7be41c44a1412df8be7eef2681dba830f84c65
+    name: pgo
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/pgo-5.8.2/pgo-5.8.2.tgz
+    version: 5.8.2
+  - apiVersion: v2
     appVersion: 5.8.0
     created: "2025-04-08T12:38:28.44411511Z"
     description: Installer for PGO, the open source Postgres Operator from Crunchy
@@ -705,4 +716,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-08T12:45:35.019987692Z"
+generated: "2025-06-17T11:54:35.551807917Z"
