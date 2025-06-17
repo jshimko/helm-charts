@@ -1,5 +1,0 @@
-# optionally extend chart with any extra templates
-{{ range .Values.extraTemplates }}
----
-{{ tpl . $ }}
-{{ end }}
