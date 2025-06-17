@@ -1,5 +1,5 @@
 # CRD reference:
-# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.7.x/postgrescluster
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:

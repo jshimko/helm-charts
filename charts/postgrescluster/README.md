@@ -10,7 +10,7 @@ Docs:
 
 Full `PostgresCluster` CRD reference (all of these configs are available in the values of this chart):
 
-<https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.6.x/postgrescluster>
+<https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster>
 
 Examples Repo:
 

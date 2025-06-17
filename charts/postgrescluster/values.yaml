@@ -113,7 +113,7 @@ postgresVersion: 17
 ##############################
 
 # Instances
-# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.7.x/postgrescluster#postgresclusterspecinstancesindex
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster#postgresclusterspecinstancesindex
 # The instances config allows you to define one or more Postgres instance sets. By default,
 # PGO will only deploy a single instance. Each instance set has similar
 # characteristics to the other instances in the set, e.g. storage size, resource
@@ -146,12 +146,12 @@ postgresVersion: 17
 #     postgresql:
 #       parameters:
 #         synchronous_commit: "on"
-# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.7.x/postgrescluster#postgresclusterspecpatroni
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster#postgresclusterspecpatroni
 # patroni: {}
 
 # users sets any custom Postgres users and databases that they have  access to
 # as well as any permissions associated with the user account.
-# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.7.x/postgrescluster#postgresclusterspecusersindex
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster#postgresclusterspecusersindex
 # users: {}
 #
 # optionally create a user schema and grant permissions for the application user on their configured databases.
@@ -159,7 +159,7 @@ postgresVersion: 17
 # autoCreateUserSchema: true
 
 # dataSource specifies a data source for bootstrapping a Postgres cluster.
-# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.7.x/postgrescluster#postgresclusterspecdatasource
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster#postgresclusterspecdatasource
 # dataSource: {}
 
 # customTLSSecret references a Secret that contains the relevant information for
@@ -282,7 +282,7 @@ postgresVersion: 17
 
 # pgBackRestConfig allows for the configuration of every pgBackRest option
 # except for "image", which is set by "pgBackRest".
-# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.7.x/postgrescluster#postgresclusterspecbackupspgbackrest
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster#postgresclusterspecbackupspgbackrest
 # pgBackRestConfig: {}
 
 ################################
@@ -291,7 +291,7 @@ postgresVersion: 17
 
 # pgBouncerConfig sets all of the pgBouncer portions of the spec except for
 # image. To set image, you need to set the "pgBouncer" setting.
-# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.7.x/postgrescluster#postgresclusterspecproxypgbouncer
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster#postgresclusterspecproxypgbouncer
 # pgBouncerConfig: {}
 
 #######################
@@ -301,7 +301,7 @@ postgresVersion: 17
 # monitoringConfig sets all of the monitoring portions of the spec except for the
 # image. To set the image, which also enables monitoring, you need to set the
 # "monitoring" setting.
-# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.7.x/postgrescluster#postgresclusterspecmonitoring
+# https://access.crunchydata.com/documentation/postgres-operator/latest/references/crd/5.8.x/postgrescluster#postgresclusterspecmonitoring
 # monitoringConfig: {}
 
 # The following "instrumentation_" fields will set the specified parts of the instrumentation
