@@ -2,18 +2,18 @@ apiVersion: v2
 name: svix
 description: A Helm chart for running svix on Kubernetes
 type: application
-version: 0.9.0
+version: 0.10.0
 
 dependencies:
   # Postgres Operator - PostgresCluster
   # https://access.crunchydata.com/documentation/postgres-operator/latest/
   - name: postgrescluster
-    version: 5.8.2
+    version: 6.0.0
     repository: https://jshimko.github.io/helm-charts
     condition: postgrescluster.enabled
 
   # https://github.com/bitnami/charts/blob/main/bitnami/redis/Chart.yaml
   - name: redis
-    version: 21.2.4
+    version: 21.2.6
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled

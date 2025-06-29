@@ -1,9 +1,9 @@
 dependencies:
 - name: postgrescluster
   repository: https://jshimko.github.io/helm-charts
-  version: 5.8.2
+  version: 6.0.0
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 21.2.4
-digest: sha256:caba3ebcf1fea9487fc6d1dfb7ee8b40c024b32bc970cf8fc3b362e494b86a2f
-generated: "2025-06-17T08:11:27.558352-04:00"
+  version: 21.2.6
+digest: sha256:e6802e803886922374909aaff25d8ea3f0dd1600bc31a693aa7963f4dd5a1507
+generated: "2025-06-29T16:49:56.694404-04:00"
