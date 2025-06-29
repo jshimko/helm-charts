@@ -1,0 +1,59 @@
+🎉 Hatchet HA has been deployed successfully!
+
+📋 Deployment Summary:
+{{- if .Values.api.enabled }}
+✅ API Service: {{ .Values.api.replicaCount }} replica(s)
+{{- end }}
+{{- if .Values.grpc.enabled }}
+✅ GRPC Service: {{ .Values.grpc.replicaCount }} replica(s)
+{{- end }}
+{{- if .Values.controller.enabled }}
+✅ Controller Service: {{ .Values.controller.replicaCount }} replica(s)
+{{- end }}
+{{- if .Values.scheduler.enabled }}
+✅ Scheduler Service: {{ .Values.scheduler.replicaCount }} replica(s)
+{{- end }}
+{{- if .Values.frontend.enabled }}
+✅ Frontend Service: {{ .Values.frontend.replicaCount }} replica(s)
+{{- end }}
+{{- if .Values.postgres.enabled }}
+✅ PostgreSQL Database: Enabled
+{{- end }}
+{{- if .Values.rabbitmq.enabled }}
+✅ RabbitMQ Message Queue: Enabled
+{{- end }}
+{{- if .Values.postgrescluster.enabled }}
+✅ PGO PostgreCluster deployment: Enabled
+{{- end }}
+{{- if .Values.rabbitmqcluster.enabled }}
+✅ RabbitMQ Cluster deployment: Enabled
+{{- end }}
+
+📊 Monitoring Status:
+{{- if .Values.jobs.migration.enabled }}
+✅ Database Migration: Completed via Helm hook
+{{- end }}
+{{- if .Values.jobs.seed.enabled }}
+✅ Data Seeding Job: Completed via Helm hook
+{{- end }}
+{{- if .Values.jobs.quickstart.enabled }}
+✅ Quickstart Setup Job: Completed via Helm hook
+{{- end }}
+{{- if .Values.jobs.workerToken.enabled }}
+✅ Worker Token Creation Job: Completed via Helm hook
+{{- end }}
+
+🔍 Useful Commands:
+  # Check all pod statuses
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+  # View logs for API service
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=api -f
+
+  # View logs for GRPC service
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=grpc -f
+
+  # Check service endpoints
+  kubectl get svc -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+📚 For more information, visit: https://docs.hatchet.run

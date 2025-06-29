@@ -1,0 +1,24 @@
+{{- range $serviceName := list "api" "grpc" "controller" "scheduler" -}}
+{{- if index $.Values $serviceName "enabled" -}}
+{{- $serviceConfig := index $.Values $serviceName -}}
+{{- if $serviceConfig.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "hatchet.backendServiceName" (dict "serviceName" $serviceName "context" $) }}
+  labels:
+    {{- include "hatchet.backendServiceLabels" (dict "serviceName" $serviceName "context" $) | nindent 4 }}
+spec:
+  {{- if $serviceConfig.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $serviceConfig.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $serviceConfig.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $serviceConfig.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "hatchet.backendServiceSelectorLabels" (dict "serviceName" $serviceName "context" $) | nindent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}

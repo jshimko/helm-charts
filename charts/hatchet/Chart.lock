@@ -1,0 +1,12 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 16.7.14
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: 16.0.9
+- name: postgrescluster
+  repository: https://jshimko.github.io/helm-charts
+  version: 5.8.2
+digest: sha256:8916b430aecfa1d1856fd77d57873143fdc3c4822fa0ff8bbca858878e270359
+generated: "2025-06-29T14:56:16.684286-04:00"

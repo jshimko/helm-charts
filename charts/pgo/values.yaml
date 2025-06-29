@@ -63,6 +63,7 @@ resources:
 #  example.com: custom-label
 
 # Enable feature gates for PGO, by explicitly setting the value for the flags
+# https://access.crunchydata.com/documentation/postgres-operator/latest/installation/feature-gates
 # features:
 #   AutoCreateUserSchema: true
 #   AutoGrowVolumes: true

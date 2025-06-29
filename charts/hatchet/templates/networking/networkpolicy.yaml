@@ -1,0 +1,80 @@
+{{- if .Values.networkPolicy.enabled }}
+{{- range $serviceName := list "api" "grpc" "controller" "scheduler" -}}
+{{- if index $.Values $serviceName "enabled" -}}
+{{- $serviceConfig := index $.Values $serviceName -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "hatchet.backendServiceName" (dict "serviceName" $serviceName "context" $) }}
+  labels:
+    {{- include "hatchet.backendServiceLabels" (dict "serviceName" $serviceName "context" $) | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "hatchet.backendServiceSelectorLabels" (dict "serviceName" $serviceName "context" $) | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    {{- if or (eq $serviceName "api") (eq $serviceName "grpc") }}
+    # Allow ingress traffic to API and GRPC services
+    - from:
+        {{- with $.Values.networkPolicy.ingress.from }}
+        {{- toYaml . | nindent 8 }}
+        {{- else }}
+        - namespaceSelector: {}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ $serviceConfig.service.targetPort }}
+    {{- end }}
+    # Allow communication from other Hatchet services
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ include "hatchet.name" $ }}
+              app.kubernetes.io/instance: {{ $.Release.Name }}
+  egress:
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow communication to other Hatchet services
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ include "hatchet.name" $ }}
+              app.kubernetes.io/instance: {{ $.Release.Name }}
+    # Allow communication to PostgreSQL
+    {{- if $.Values.postgres.enabled }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+              app.kubernetes.io/instance: {{ $.Release.Name }}
+      ports:
+        - protocol: TCP
+          port: {{ $.Values.postgres.primary.service.ports.postgresql }}
+    {{- end }}
+    # Allow communication to RabbitMQ
+    {{- if $.Values.rabbitmq.enabled }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rabbitmq
+              app.kubernetes.io/instance: {{ $.Release.Name }}
+      ports:
+        - protocol: TCP
+          port: {{ $.Values.rabbitmq.service.ports.amqp }}
+    {{- end }}
+    {{- with $.Values.networkPolicy.egress.to }}
+    # Additional egress rules
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

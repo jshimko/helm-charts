@@ -1,0 +1,113 @@
+{{- if .Values.jobs.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hatchet.fullname" . }}-migration
+  labels:
+    {{- include "hatchet.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migration
+  {{- with .Values.jobs.migration.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.jobs.migration.backoffLimit }}
+  backoffLimit: {{ . }}
+  {{- end }}
+  {{- with .Values.jobs.migration.activeDeadlineSeconds }}
+  activeDeadlineSeconds: {{ . }}
+  {{- end }}
+  {{- with .Values.jobs.migration.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ . }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.jobs.migration.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hatchet.labels" . | nindent 8 }}
+        app.kubernetes.io/component: migration
+        {{- with .Values.jobs.migration.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hatchet.fullname" . }}-migration
+      {{- with .Values.jobs.migration.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: {{ .Values.jobs.migration.restartPolicy }}
+      initContainers:
+        - name: check-db-connection
+          image: postgres:latest
+          env:
+            {{- if .Values.jobs.migration.useSharedEnv }}
+            {{- include "hatchet.sharedEnv" . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.jobs.migration.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.jobs.migration.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command: ['sh', '-c', 'until pg_isready -d $DATABASE_URL; do echo waiting for database; sleep 2; done;']
+      containers:
+        - name: migration
+          {{- with .Values.jobs.migration.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.jobs.migration.image.repository }}:{{ .Values.jobs.migration.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.jobs.migration.image.pullPolicy }}
+          {{- with .Values.jobs.migration.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.jobs.migration.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            {{- if .Values.jobs.migration.useSharedEnv }}
+            {{- include "hatchet.sharedEnv" . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.jobs.migration.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- include "hatchet.sharedEnvFrom" . | nindent 12 }}
+            {{- with .Values.jobs.migration.envFrom }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.jobs.migration.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.jobs.migration.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.jobs.migration.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.jobs.migration.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.jobs.migration.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.jobs.migration.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

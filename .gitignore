@@ -1,3 +1,5 @@
 charts/**/charts
 charts/**/local-dev.yaml
 .DS_Store
+
+rabbitmq-cluster.yaml

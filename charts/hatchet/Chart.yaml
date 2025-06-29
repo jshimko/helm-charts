@@ -1,0 +1,34 @@
+apiVersion: v2
+name: hatchet
+description: A Helm chart for a high availability Hatchet deployment. https://hatchet.run
+type: application
+
+version: 0.1.0
+
+# This is the version (and Docker tag) of the Hatchet build being deployed.
+# https://github.com/hatchet-dev/hatchet/releases
+appVersion: "v0.64.2"
+
+dependencies:
+  # https://github.com/bitnami/charts/tree/main/bitnami/postgresql
+  - name: "postgresql"
+    condition: postgres.enabled
+    repository: "https://charts.bitnami.com/bitnami"
+    version: "^16.7.14"
+    alias: postgres
+
+  # https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq
+  - name: "rabbitmq"
+    condition: rabbitmq.enabled
+    repository: "https://charts.bitnami.com/bitnami"
+    version: "^16.0.9"
+    alias: rabbitmq
+
+  # Postgres Operator - PostgresCluster
+  # Optionally deploy a PostgresCluster instance with PGO if you have PGO installed in the cluster.
+  # Docs: https://access.crunchydata.com/documentation/postgres-operator/latest/
+  # Chart: https://github.com/jshimko/helm-charts/tree/main/charts/postgrescluster
+  - name: postgrescluster
+    version: "^5.8.2"
+    repository: https://jshimko.github.io/helm-charts
+    condition: postgrescluster.enabled

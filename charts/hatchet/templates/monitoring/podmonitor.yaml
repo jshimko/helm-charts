@@ -1,0 +1,51 @@
+{{- if .Values.monitoring.podMonitor.enabled }}
+{{- range $serviceName := list "api" "grpc" "controller" "scheduler" -}}
+{{- if index $.Values $serviceName "enabled" -}}
+{{- $serviceConfig := index $.Values $serviceName -}}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "hatchet.backendServiceName" (dict "serviceName" $serviceName "context" $) }}
+  labels:
+    {{- include "hatchet.backendServiceLabels" (dict "serviceName" $serviceName "context" $) | nindent 4 }}
+    {{- with $.Values.monitoring.podMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $.Values.monitoring.podMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "hatchet.backendServiceSelectorLabels" (dict "serviceName" $serviceName "context" $) | nindent 6 }}
+  podMetricsEndpoints:
+    - port: http
+      {{- with $.Values.monitoring.podMonitor.interval }}
+      interval: {{ . }}
+      {{- end }}
+      {{- with $.Values.monitoring.podMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ . }}
+      {{- end }}
+      {{- with $.Values.monitoring.podMonitor.path }}
+      path: {{ . }}
+      {{- end }}
+      {{- with $.Values.monitoring.podMonitor.scheme }}
+      scheme: {{ . }}
+      {{- end }}
+      {{- with $.Values.monitoring.podMonitor.tlsConfig }}
+      tlsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.monitoring.podMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.monitoring.podMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
