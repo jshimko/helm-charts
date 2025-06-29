@@ -2,6 +2,8 @@ apiVersion: v2
 name: postgrescluster
 description: A Helm chart for deploying a PostgresCluster instance using Crunchy Postgres Operator. https://access.crunchydata.com/documentation/postgres-operator/latest
 type: application
-# The version below should match the version on the PostgresCluster CRD
-version: 5.8.2
+
+version: 6.0.0
+
+# The appVersion should match the version on the PostgresCluster CRD
 appVersion: 5.8.2
