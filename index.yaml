@@ -86,6 +86,17 @@ entries:
   postgrescluster:
   - apiVersion: v2
     appVersion: 5.8.2
+    created: "2025-06-29T20:26:13.059386712Z"
+    description: A Helm chart for deploying a PostgresCluster instance using Crunchy
+      Postgres Operator. https://access.crunchydata.com/documentation/postgres-operator/latest
+    digest: c23d0cdf06b35456fed4d40cc776fdbbabd09622af1fbdc586afa16e761983f8
+    name: postgrescluster
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/postgrescluster-6.0.0/postgrescluster-6.0.0.tgz
+    version: 6.0.0
+  - apiVersion: v2
+    appVersion: 5.8.2
     created: "2025-06-17T12:05:27.254141983Z"
     description: A Helm chart for deploying a PostgresCluster instance using Crunchy
       Postgres Operator. https://access.crunchydata.com/documentation/postgres-operator/latest
@@ -771,4 +782,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-29T20:01:58.260895522Z"
+generated: "2025-06-29T20:26:13.059554256Z"
