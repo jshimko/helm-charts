@@ -1,5 +1,6 @@
 charts/**/charts
 charts/**/local-dev.yaml
 .DS_Store
-
+.task
 rabbitmq-cluster.yaml
+.deps-hash

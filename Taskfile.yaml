@@ -1,0 +1,184 @@
+version: "3"
+
+tasks:
+  update:
+    desc: "Update dependencies for {{ .CLI_ARGS }} chart"
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - echo "Updating dependencies for {{ .CLI_ARGS }} chart"
+      - helm dependency update
+
+  update-all:
+    desc: "Update dependencies for all charts"
+    silent: true
+    cmds:
+      - printf "\nUpdating dependencies for all charts. \n\n"
+      - |
+        for chart in charts/*/; do
+          if [ -f "$chart/Chart.yaml" ]; then
+            chart_name=$(basename "$chart")
+
+            # Only run if chart has dependencies and needs updating
+            if grep -q "dependencies:" "$chart/Chart.yaml"; then
+              if [ ! -f "$chart/Chart.lock" ] || [ ! -d "$chart/charts" ]; then
+                echo "Initial dependency update for $chart_name"
+                task update -- "$chart_name"
+              else
+                # Get hash of dependencies section
+                deps_hash=$(awk '/dependencies:/{flag=1} flag && /^[^ ]/{exit} flag' "$chart/Chart.yaml" | sha256sum | cut -d' ' -f1)
+
+                # Check if hash changed
+                if [ ! -f "$chart/.deps-hash" ] || [ "$deps_hash" != "$(cat "$chart/.deps-hash" 2>/dev/null)" ]; then
+                  task update -- "$chart_name"
+                  echo "$deps_hash" > "$chart/.deps-hash"
+                else
+                  echo "Skipping $chart_name - dependencies unchanged"
+                fi
+              fi
+            else
+              echo "Skipping $chart_name - no dependencies"
+            fi
+          fi
+        done
+
+  lint:
+    desc: "Lint {{ .CLI_ARGS }} chart"
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - helm lint .
+
+  lint-all:
+    desc: "Lint all charts"
+    silent: true
+    cmds:
+      - printf "\nLinting all charts. \n\n"
+      - |
+        for chart in charts/*/; do
+          if [ -f "$chart/Chart.yaml" ]; then
+            chart_name=$(basename "$chart")
+            echo "Linting $chart_name..."
+            if helm lint "$chart"; then
+              echo "✓ $chart_name passed linting"
+            else
+              echo "✗ $chart_name failed linting"
+            fi
+            echo ""
+          fi
+        done
+
+  package:
+    desc: "Package {{ .CLI_ARGS }} chart"
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - helm package . --destination ../../dist/
+
+  package-all:
+    desc: "Package all charts"
+    deps: [update-all]
+    cmds:
+      - mkdir -p dist
+      - |
+        for chart in charts/*/; do
+          if [ -f "$chart/Chart.yaml" ]; then
+            chart_name=$(basename "$chart")
+            echo "Packaging $chart_name..."
+            helm package "$chart" --destination dist/
+          fi
+        done
+
+  template:
+    desc: "Render templates for {{ .CLI_ARGS }} chart"
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - helm template . {{ if .VALUES }}--values {{ .VALUES }}{{ end }}
+
+  clean:
+    desc: "Clean generated files"
+    cmds:
+      - rm -rf charts/*/charts
+      - rm -f charts/*/.deps-hash
+      - rm -f charts/*/Chart.lock
+      - rm -rf dist/
+      - echo "Cleaned all generated files"
+
+  version:
+    desc: "Show version of {{ .CLI_ARGS }} chart"
+    silent: true
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - |
+        chart_version=$(grep '^version:' Chart.yaml | awk '{print $2}')
+        app_version=$(grep '^appVersion:' Chart.yaml | awk '{print $2}')
+        echo "{{ .CLI_ARGS }}: chart=$chart_version, app=$app_version"
+
+  versions:
+    desc: "Show versions of all charts"
+    silent: true
+    cmds:
+      - printf "\nChart versions:\n\n"
+      - |
+        for chart in charts/*/; do
+          if [ -f "$chart/Chart.yaml" ]; then
+            chart_name=$(basename "$chart")
+            task version -- "$chart_name"
+          fi
+        done
+
+  bump-version:
+    desc: "Bump version of {{ .CLI_ARGS }} chart (use TYPE=major|minor|patch)"
+    dir: charts/{{ .CLI_ARGS }}
+    vars:
+      TYPE: '{{ .TYPE | default "patch" }}'
+    cmds:
+      - |
+        current_version=$(grep '^version:' Chart.yaml | awk '{print $2}')
+        IFS='.' read -r major minor patch <<< "$current_version"
+
+        case "{{ .TYPE }}" in
+          major)
+            new_version="$((major + 1)).0.0"
+            ;;
+          minor)
+            new_version="${major}.$((minor + 1)).0"
+            ;;
+          patch)
+            new_version="${major}.${minor}.$((patch + 1))"
+            ;;
+        esac
+
+        sed -i.bak "s/^version: .*/version: $new_version/" Chart.yaml
+        rm Chart.yaml.bak
+        echo "Bumped {{ .CLI_ARGS }} from $current_version to $new_version"
+
+  validate:
+    desc: "Validate {{ .CLI_ARGS }} chart with values file"
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - |
+        if [ -f "{{ .VALUES | default "values.yaml" }}" ]; then
+          helm template . --values {{ .VALUES | default "values.yaml" }} --debug --dry-run
+        else
+          echo "Values file not found: {{ .VALUES | default "values.yaml" }}"
+          exit 1
+        fi
+
+  deps-tree:
+    desc: "Show dependency tree for {{ .CLI_ARGS }} chart"
+    silent: true
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - |
+        if [ -f Chart.lock ]; then
+          echo "Dependencies for {{ .CLI_ARGS }}:"
+          cat Chart.lock | grep -E "name:|version:|repository:" | sed 's/^/  /'
+        else
+          echo "No dependencies found for {{ .CLI_ARGS }}"
+        fi
+
+  install-tools:
+    desc: "Install helpful Helm plugins"
+    cmds:
+      - helm plugin install https://github.com/databus23/helm-diff || true
+      - helm plugin install https://github.com/jkroepke/helm-secrets || true
+      - helm plugin install https://github.com/chartmuseum/helm-push || true
+      - echo "Helm plugins installed"
