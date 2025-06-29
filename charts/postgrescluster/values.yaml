@@ -12,11 +12,9 @@
 # name: hippo
 
 # PostgresCluster annotations
+# https://access.crunchydata.com/documentation/postgres-operator/latest/installation/feature-gates
 # annotations:
 #   postgres-operator.crunchydata.com/someFeature: "true"
-
-# Optional: autoCreateUserSchema: true instead of using annotations above
-# autoCreateUserSchema: true
 
 # postgresVersion sets the version to deploy. This version number needs to be
 # available as one of the "RELATED_IMAGE_POSTGRES_..." images as part of the PGO
