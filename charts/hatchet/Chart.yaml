@@ -3,7 +3,7 @@ name: hatchet
 description: A Helm chart for a high availability Hatchet deployment. https://hatchet.run
 type: application
 
-version: 0.1.0
+version: 0.2.0
 
 # This is the version (and Docker tag) of the Hatchet build being deployed.
 # https://github.com/hatchet-dev/hatchet/releases
