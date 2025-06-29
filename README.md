@@ -4,6 +4,7 @@ This repository contains [Helm](https://helm.sh/) charts for various open source
 
 - [PGO](./charts/pgo/) - See also [Crunchy Postgres Operator](https://access.crunchydata.com/documentation/postgres-operator/latest)
 - [PostgresCluster](./charts/postgrescluster/) - See also <https://access.crunchydata.com/documentation/postgres-operator/latest>
+- [Hatchet](./charts/hatchet/) - See also <https://hatchet.run>
 - [Svix Webhooks](./charts/svix/) - See also <https://www.svix.com>
 
 ## Usage
