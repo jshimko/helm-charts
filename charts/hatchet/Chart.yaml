@@ -3,7 +3,7 @@ name: hatchet
 description: A Helm chart for a high availability Hatchet deployment. https://hatchet.run
 type: application
 
-version: 0.2.0
+version: 0.2.1
 
 # This is the version (and Docker tag) of the Hatchet build being deployed.
 # https://github.com/hatchet-dev/hatchet/releases
@@ -29,6 +29,6 @@ dependencies:
   # Docs: https://access.crunchydata.com/documentation/postgres-operator/latest/
   # Chart: https://github.com/jshimko/helm-charts/tree/main/charts/postgrescluster
   - name: postgrescluster
-    version: "^5.8.2"
+    version: "^6.0.0"
     repository: https://jshimko.github.io/helm-charts
     condition: postgrescluster.enabled
