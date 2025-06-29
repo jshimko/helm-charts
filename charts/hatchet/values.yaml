@@ -1078,6 +1078,7 @@ rabbitmqcluster:
 # Misc extra k8s manifests to be deployed
 extraManifests: []
   ## Example RabbitmqCluster deployment
+  # https://www.rabbitmq.com/kubernetes/operator/using-operator#configure
   #
   # - apiVersion: rabbitmq.com/v1beta1
   #   kind: RabbitmqCluster
