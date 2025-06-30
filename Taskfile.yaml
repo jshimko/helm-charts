@@ -66,6 +66,94 @@ tasks:
           fi
         done
 
+  docs:
+    desc: "Generate documentation for {{ .CLI_ARGS }} chart"
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - |
+        if ! command -v helm-docs &> /dev/null; then
+          echo "helm-docs is not installed. Install it with: brew install helm-docs"
+          echo "Or download from: https://github.com/norwoodj/helm-docs/releases"
+          exit 1
+        fi
+      - helm-docs .
+      - echo "Generated README.md for {{ .CLI_ARGS }}"
+
+  docs-all:
+    desc: "Generate documentation for all charts"
+    silent: true
+    cmds:
+      - |
+        if ! command -v helm-docs &> /dev/null; then
+          echo "helm-docs is not installed. Install it with:"
+          echo "  brew install helm-docs"
+          echo "  # or"
+          echo "  go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest"
+          exit 1
+        fi
+      - printf "\nGenerating documentation for all charts. \n\n"
+      - |
+        for chart in charts/*/; do
+          if [ -f "$chart/Chart.yaml" ]; then
+            chart_name=$(basename "$chart")
+            echo "Generating docs for $chart_name..."
+            (cd "$chart" && helm-docs .)
+          fi
+        done
+
+  docs-init:
+    desc: "Initialize helm-docs template for {{ .CLI_ARGS }} chart"
+    dir: charts/{{ .CLI_ARGS }}
+    cmds:
+      - |
+        cat > README.md.gotmpl << 'EOF'
+        {{ template "chart.header" . }}
+        {{ template "chart.deprecationWarning" . }}
+
+        {{ template "chart.badgesSection" . }}
+
+        {{ template "chart.description" . }}
+
+        {{ template "chart.homepageLine" . }}
+
+        ## Installing the Chart
+
+        To install the chart with the release name `my-{{ template "chart.name" . }}`:
+
+        ```console
+        helm install my-{{ template "chart.name" . }} -n my-namespace jshimko/{{ template "chart.name" . }}
+        ```
+
+        ## Uninstalling the Chart
+
+        ```console
+        helm delete my-{{ template "chart.name" . }}
+        ```
+
+        {{ template "chart.maintainersSection" . }}
+
+        {{ template "chart.sourcesSection" . }}
+
+        {{ template "chart.requirementsSection" . }}
+
+        {{ template "chart.valuesSection" . }}
+
+        ## Configuration
+
+        The following table lists the configurable parameters and their default values.
+
+        {{ template "chart.valuesTable" . }}
+
+        Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`.
+
+        Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example:
+
+        ```console
+        helm install my-{{ template "chart.name" . }} -n my-namespace jshimko/{{ template "chart.name" . }} -f values.yaml
+        ```
+        EOF
+      - echo "Created README.md.gotmpl template for {{ .CLI_ARGS }}"
+
   package:
     desc: "Package {{ .CLI_ARGS }} chart"
     dir: charts/{{ .CLI_ARGS }}
