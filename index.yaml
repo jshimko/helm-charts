@@ -2,6 +2,31 @@ apiVersion: v1
 entries:
   hatchet:
   - apiVersion: v2
+    appVersion: v0.69.0
+    created: "2025-07-11T19:39:24.806015539Z"
+    dependencies:
+    - alias: postgres
+      condition: postgres.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: ^16.7.14
+    - alias: rabbitmq
+      condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: https://charts.bitnami.com/bitnami
+      version: ^16.0.9
+    - condition: postgrescluster.enabled
+      name: postgrescluster
+      repository: https://jshimko.github.io/helm-charts
+      version: ^6.0.0
+    description: A Helm chart for a high availability Hatchet deployment. https://hatchet.run
+    digest: 965f4bf8bc297d3d94e68f6ae6c546c4aa1438fc7a3c3a043a50d70ac31a25a9
+    name: hatchet
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/hatchet-0.3.0/hatchet-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     appVersion: v0.64.2
     created: "2025-06-29T20:51:49.018933711Z"
     dependencies:
@@ -843,4 +868,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-29T20:54:16.099529756Z"
+generated: "2025-07-11T19:39:24.806129291Z"
