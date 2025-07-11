@@ -3,11 +3,11 @@ name: hatchet
 description: A Helm chart for a high availability Hatchet deployment. https://hatchet.run
 type: application
 
-version: 0.2.1
+version: 0.3.0
 
 # This is the version (and Docker tag) of the Hatchet build being deployed.
 # https://github.com/hatchet-dev/hatchet/releases
-appVersion: "v0.64.2"
+appVersion: "v0.69.0"
 
 dependencies:
   # https://github.com/bitnami/charts/tree/main/bitnami/postgresql
