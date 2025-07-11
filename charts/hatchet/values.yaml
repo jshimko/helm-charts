@@ -239,36 +239,36 @@ grpc:
   ingress:
     enabled: false
     className: ""
-    annotations:
-      {}
-      # cert-manager.io/cluster-issuer: letsencrypt-prod
+    annotations: {}
       # nginx.ingress.kubernetes.io/auth-tls-verify-client: "optional"
-      # nginx.ingress.kubernetes.io/auth-tls-secret: "${kubernetes_namespace.cloud.metadata[0].name}/engine-cert"
+      # nginx.ingress.kubernetes.io/auth-tls-secret: "hatchet/engine-cert"
       # nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
       # nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
+      # kubernetes.io/ingress.class: nginx
       # nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
       # nginx.ingress.kubernetes.io/grpc-backend: "true"
+      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
       # nginx.ingress.kubernetes.io/server-snippet: |
       #   grpc_read_timeout 1d;
       #   grpc_send_timeout 1h;
       #   client_header_timeout 1h;
       #   client_body_timeout 1h;
-    hosts:
-      []
-      # - host: engine.hatchet.example.com
-      #   paths:
-      #     - path: /
-      #       pathType: ImplementationSpecific
-      #   backend:
-      #     serviceName: hatchet-engine
-      #     servicePort: 7070
-    tls:
-      []
+    rules: []
+      # - host: engine.hatchet.pianobooker.dev
+      #   http:
+      #     paths:
+      #       - path: /
+      #         pathType: Prefix
+      #         backend:
+      #           service:
+      #             name: hatchet-grpc
+      #             port:
+      #               number: 7070
+    tls: []
       # - hosts:
-      #     - engine.hatchet.example.com
-      #   secretName: engine-cert
-      #   servicePort: 7070
+      #     - engine.hatchet.pianobooker.dev
+      #   secretName: hatchet-engine-tls
 
   resources: {}
 
@@ -821,32 +821,37 @@ frontend:
   ingress:
     enabled: false
     className: ""
-    annotations:
-      {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
+    annotations: {}
       # nginx.ingress.kubernetes.io/proxy-body-size: 50m
       # nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
       # nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
       # nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
       # cert-manager.io/cluster-issuer: letsencrypt-prod
-    hosts:
-      []
-      # - host: hatchet.example.com
-      #   paths:
-      #     - path: /api
-      #       backend:
-      #         serviceName: hatchet-api
-      #         servicePort: 8080
-      #     - path: /
-      #       backend:
-      #         serviceName: hatchet-frontend
-      #         servicePort: 8080
-    tls:
-      []
-      # - secretName: hatchet-api
+      # kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # nginx.ingress.kubernetes.io/use-regex: "true"
+    rules: []
+      # - host: hatchet.pianobooker.dev
+      #   http:
+      #     paths:
+      #       - path: /.*
+      #         pathType: ImplementationSpecific
+      #         backend:
+      #           service:
+      #             name: hatchet-frontend
+      #             port:
+      #               number: 8080
+      #       - path: /api/.*
+      #         pathType: ImplementationSpecific
+      #         backend:
+      #           service:
+      #             name: hatchet-api
+      #             port:
+      #               number: 8080
+    tls: []
+      # - secretName: hatchet-tls
       #   hosts:
-      #     - hatchet.example.com
+      #     - hatchet.pianobooker.dev
 
   resources:
     {}
@@ -978,7 +983,7 @@ postgrescluster:
   # -- Postgres instances
   instances:
     - name: hatchet
-      replicas: 1
+      replicas: 2
 
       # -- Postgres instance resources
       resources:
@@ -995,9 +1000,9 @@ postgrescluster:
           - "ReadWriteOnce"
         resources:
           requests:
-            storage: 10Gi
+            storage: 30Gi
 
-  pgBouncerReplicas: 1
+  pgBouncerReplicas: 2
 
   # pgBackRest Backups
   # https://pgbackrest.org/user-guide.html
@@ -1033,7 +1038,6 @@ postgrescluster:
           # differential backup at 12:00 UTC Monday-Saturday
           differential: "0 12 * * 1-6"
 
-
 # Bitnami Postgres chart
 postgres:
   enabled: false
@@ -1064,7 +1068,6 @@ caddy:
   annotations: {}
   port: 8080
 
-
 # RabbitMQ Cluster Operator
 # Install the operator with the following command, then create any amount of custom RabbitmqCluster's using
 # extraManifests below (see example).
@@ -1076,7 +1079,8 @@ rabbitmqcluster:
   enabled: false
 
 # Misc extra k8s manifests to be deployed
-extraManifests: []
+extraManifests:
+  []
   ## Example RabbitmqCluster deployment
   # https://www.rabbitmq.com/kubernetes/operator/using-operator#configure
   #

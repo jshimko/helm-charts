@@ -14,32 +14,13 @@ spec:
   {{- with .Values.frontend.ingress.className }}
   ingressClassName: {{ . }}
   {{- end }}
-  {{- if .Values.frontend.ingress.tls }}
+  {{- with .Values.frontend.ingress.tls }}
   tls:
-    {{- range .Values.frontend.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.frontend.ingress.rules }}
   rules:
-    {{- range .Values.frontend.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
-        paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- with .pathType }}
-            pathType: {{ . }}
-            {{- end }}
-            backend:
-              service:
-                name: {{ include "hatchet.fullname" $ }}-frontend
-                port:
-                  number: {{ $.Values.frontend.service.port }}
-          {{- end }}
-    {{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- end }}
 {{- end }}
