@@ -240,22 +240,32 @@ grpc:
     enabled: false
     className: ""
     annotations: {}
-      # nginx.ingress.kubernetes.io/auth-tls-verify-client: "optional"
-      # nginx.ingress.kubernetes.io/auth-tls-secret: "hatchet/engine-cert"
-      # nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-      # nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
       # cert-manager.io/cluster-issuer: letsencrypt-prod
-      # kubernetes.io/ingress.class: nginx
       # nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
       # nginx.ingress.kubernetes.io/grpc-backend: "true"
-      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+      # # Extended timeouts for gRPC
+      # nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+      # nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      # nginx.ingress.kubernetes.io/proxy-read-timeout: "86400"
+      # nginx.ingress.kubernetes.io/proxy-stream-timeout: "86400"
+
+      # # Optional: service affinity
+      # nginx.ingress.kubernetes.io/affinity: "cookie"
+      # nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+      # nginx.ingress.kubernetes.io/session-cookie-name: "grpc-affinity"
+      # nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
+
       # nginx.ingress.kubernetes.io/server-snippet: |
-      #   grpc_read_timeout 1d;
-      #   grpc_send_timeout 1h;
       #   client_header_timeout 1h;
       #   client_body_timeout 1h;
+      #   grpc_read_timeout 1d;
+      #   grpc_send_timeout 1h;
+      #   grpc_socket_keepalive on;
+      #   keepalive_timeout 86400;
+      #   keepalive_requests 100000;
     rules: []
-      # - host: engine.hatchet.pianobooker.dev
+      # - host: engine.hatchet.example.com
       #   http:
       #     paths:
       #       - path: /
@@ -267,7 +277,7 @@ grpc:
       #               number: 7070
     tls: []
       # - hosts:
-      #     - engine.hatchet.pianobooker.dev
+      #     - engine.hatchet.example.com
       #   secretName: hatchet-engine-tls
 
   resources: {}
@@ -822,27 +832,26 @@ frontend:
     enabled: false
     className: ""
     annotations: {}
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
+      # kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
       # nginx.ingress.kubernetes.io/proxy-body-size: 50m
       # nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
       # nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
       # nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
-      # cert-manager.io/cluster-issuer: letsencrypt-prod
-      # kubernetes.io/ingress.class: nginx
-      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      # nginx.ingress.kubernetes.io/use-regex: "true"
     rules: []
-      # - host: hatchet.pianobooker.dev
+      # - host: hatchet.example.com
       #   http:
       #     paths:
-      #       - path: /.*
-      #         pathType: ImplementationSpecific
+      #       - path: /
+      #         pathType: Prefix
       #         backend:
       #           service:
       #             name: hatchet-frontend
       #             port:
       #               number: 8080
-      #       - path: /api/.*
-      #         pathType: ImplementationSpecific
+      #       - path: /api
+      #         pathType: Prefix
       #         backend:
       #           service:
       #             name: hatchet-api
@@ -851,7 +860,7 @@ frontend:
     tls: []
       # - secretName: hatchet-tls
       #   hosts:
-      #     - hatchet.pianobooker.dev
+      #     - hatchet.example.com
 
   resources:
     {}
