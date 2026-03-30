@@ -1,6 +1,6 @@
-charts/**/charts
-charts/**/local-dev.yaml
+.bak
+.deps-hash
 .DS_Store
 .task
-rabbitmq-cluster.yaml
-.deps-hash
+charts/**/charts
+charts/**/local-dev.yaml

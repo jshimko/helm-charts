@@ -4,7 +4,6 @@ This repository contains [Helm](https://helm.sh/) charts for various open source
 
 - [PGO](./charts/pgo/) - See also [Crunchy Postgres Operator](https://access.crunchydata.com/documentation/postgres-operator/latest)
 - [PostgresCluster](./charts/postgrescluster/) - See also <https://access.crunchydata.com/documentation/postgres-operator/latest>
-- [Hatchet](./charts/hatchet/) - See also <https://hatchet.run>
 - [Svix Webhooks](./charts/svix/) - See also <https://www.svix.com>
 
 ## Usage
@@ -19,5 +18,5 @@ helm repo update
 To install any chart in this repository:
 
 ```sh
-helm install my-release -n my-namespace jshimko/chart-name
+helm install my-release -n my-namespace jshimko/$CHART_NAME
 ```
