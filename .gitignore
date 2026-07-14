@@ -4,3 +4,6 @@
 .task
 charts/**/charts
 charts/**/local-dev.yaml
+.claude
+CLAUDE.md
+**/CLAUDE.md

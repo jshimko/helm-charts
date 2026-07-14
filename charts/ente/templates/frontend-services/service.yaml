@@ -1,0 +1,30 @@
+{{- range $serviceName := include "services.frontendServices" $ | fromJsonArray -}}
+{{- if index $.Values $serviceName "enabled" -}}
+{{- $serviceConfig := index $.Values $serviceName -}}
+{{- if ne ($serviceConfig.service.enabled | default true) false }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "ente-{{ include "services.frontendServiceName" (dict "serviceName" $serviceName "context" $) }}"
+  labels:
+    {{- include "services.frontendServiceLabels" (dict "serviceName" $serviceName "context" $) | nindent 4 }}
+    {{- with $serviceConfig.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $serviceConfig.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $serviceConfig.service.type }}
+  ports:
+    - port: {{ $serviceConfig.service.port }}
+      targetPort: {{ $serviceConfig.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "services.frontendServiceSelectorLabels" (dict "serviceName" $serviceName "context" $) | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,41 @@
+{{- range $serviceName := include "services.frontendServices" $ | fromJsonArray -}}
+{{- if index $.Values $serviceName "enabled" -}}
+{{- $serviceConfig := index $.Values $serviceName -}}
+{{- if $serviceConfig.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "ente-{{ include "services.frontendServiceName" (dict "serviceName" $serviceName "context" $) }}"
+  labels:
+    {{- include "services.frontendServiceLabels" (dict "serviceName" $serviceName "context" $) | nindent 4 }}
+  {{- with $serviceConfig.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $serviceConfig.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with $serviceConfig.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range $serviceConfig.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: "ente-{{ include "services.frontendServiceName" (dict "serviceName" $serviceName "context" $) }}"
+                port:
+                  name: http
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

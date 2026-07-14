@@ -1,0 +1,38 @@
+{{- range $serviceName := include "services.frontendServices" $ | fromJsonArray -}}
+{{- if index $.Values $serviceName "enabled" -}}
+{{- $serviceConfig := index $.Values $serviceName -}}
+{{- if $serviceConfig.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: "ente-{{ include "services.frontendServiceName" (dict "serviceName" $serviceName "context" $) }}"
+  labels:
+    {{- include "services.frontendServiceLabels" (dict "serviceName" $serviceName "context" $) | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: "ente-{{ include "services.frontendServiceName" (dict "serviceName" $serviceName "context" $) }}"
+  minReplicas: {{ $serviceConfig.autoscaling.minReplicas }}
+  maxReplicas: {{ $serviceConfig.autoscaling.maxReplicas }}
+  metrics:
+    {{- if $serviceConfig.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $serviceConfig.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if $serviceConfig.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $serviceConfig.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

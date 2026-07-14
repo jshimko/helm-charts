@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: "f17f7f86"
+type: application
+name: ente-photos
+description: A Helm chart for Ente Photos end-to-end encrypted photo storage
+sources:
+  - https://github.com/ente-io/ente
+  - https://github.com/jshimko/helm-charts/tree/main/charts/ente-photos
+maintainers:
+  - name: jshimko
+    email: hello@jshimko.dev
+version: 0.1.0

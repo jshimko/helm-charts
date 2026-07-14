@@ -1,0 +1,172 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ente-museum
+  labels:
+    {{- include "ente-photos.museum.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.museum.replicaCount }}
+  {{- with .Values.museum.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ente-photos.museum.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.museum.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ente-photos.museum.labels" . | nindent 8 }}
+        {{- with .Values.museum.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.museum.serviceAccount.create }}
+      serviceAccountName: {{ .Values.museum.serviceAccount.name | default "ente-museum" }}
+      {{- end }}
+      {{- with .Values.museum.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.museum.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.museum.terminationGracePeriodSeconds }}
+      initContainers:
+      {{- if and .Values.cnpg.enabled .Values.cnpg.initContainer.enabled }}
+        - name: check-db-connection
+          image: {{ .Values.cnpg.initContainer.image }}
+          env:
+            - name: DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.cnpg.cluster.name }}-app"
+                  key: "uri"
+          command: ['sh', '-c', 'echo "Waiting for postgres database to be ready..." && until pg_isready -d $DATABASE_URI; do echo waiting for database; sleep 2; done;']
+      {{- end }}
+      {{- with .Values.museum.initContainers }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: museum
+          image: "{{ .Values.museum.image.repository }}:{{ .Values.museum.image.tag | default .Chart.AppVersion  }}"
+          imagePullPolicy: {{ .Values.museum.image.pullPolicy }}
+          env:
+            # Load the database credentials from the CloudNativePG cluster secret when enabled
+            # https://cloudnative-pg.io/docs/devel/applications#secrets
+            {{- if .Values.cnpg.enabled }}
+            - name: ENTE_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.cnpg.cluster.name }}-app"
+                  key: "user"
+            - name: ENTE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.cnpg.cluster.name }}-app"
+                  key: "password"
+            - name: ENTE_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.cnpg.cluster.name }}-app"
+                  key: "host"
+            - name: ENTE_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.cnpg.cluster.name }}-app"
+                  key: "port"
+            - name: ENTE_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.cnpg.cluster.name }}-app"
+                  key: "dbname"
+            {{- end }}
+            {{- include "services.sharedEnv" . | nindent 12 }}
+            {{- with .Values.museum.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.museum.envFrom }}
+          envFrom:
+            {{- include "services.sharedEnvFrom" . | nindent 12 }}
+            {{- with .Values.museum.envFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.museum.service.targetPort }}
+              protocol: TCP
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.metrics.port | default 2112 }}
+              protocol: TCP
+            {{- end }}
+          {{- if or .Values.museum.persistence.data.enabled .Values.museum.extraVolumeMounts }}
+          volumeMounts:
+            {{- if .Values.museum.persistence.data.enabled }}
+            - name: data
+              mountPath: /data
+            {{- end }}
+            {{- with .Values.museum.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.museum.livenessProbe.enabled }}
+          livenessProbe:
+            {{- toYaml (omit .Values.museum.livenessProbe "enabled") | nindent 12 }}
+          {{- end }}
+          {{- if .Values.museum.readinessProbe.enabled }}
+          readinessProbe:
+            {{- toYaml (omit .Values.museum.readinessProbe "enabled") | nindent 12 }}
+          {{- end }}
+          {{- if .Values.museum.startupProbe.enabled }}
+          startupProbe:
+            {{- toYaml (omit .Values.museum.startupProbe "enabled") | nindent 12 }}
+          {{- end }}
+          {{- with .Values.museum.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.museum.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- if or .Values.museum.persistence.data.enabled .Values.museum.extraVolumes }}
+      volumes:
+        {{- if .Values.museum.persistence.data.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: ente-museum-data
+        {{- end }}
+        {{- with .Values.museum.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.museum.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.museum.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.museum.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.museum.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

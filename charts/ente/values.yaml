@@ -1,0 +1,1057 @@
+# Default values for Ente Photos
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Override the name of the chart
+nameOverride: ""
+
+# -- Override the full name of the release
+fullnameOverride: ""
+
+# -- Additional labels for all resources
+commonLabels: {}
+
+# -- Additional annotations for all resources
+commonAnnotations: {}
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# Shared configuration for all Ente services
+sharedConfig:
+  env: []
+  envFrom: []
+
+# =============================================================================
+# MUSEUM SERVER CONFIGURATION (Main API Server)
+# =============================================================================
+museum:
+  # -- Museum server image configuration
+  image:
+    # -- Museum server image repository
+    repository: ghcr.io/ente-io/server
+    # -- Museum server image tag (defaults to "latest")
+    tag: ""
+    # -- Museum server image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Number of Museum server replicas
+  replicaCount: 1
+
+  # -- Museum server container resource requests and limits
+  resources: {}
+    # requests:
+    #   cpu: 200m
+    #   memory: 256Mi
+    # limits:
+    #   cpu: 1000m
+    #   memory: 1Gi
+
+  # -- Additional environment variables for Museum server
+  env: []
+    # - name: CUSTOM_VAR
+    #   value: "custom-value"
+
+  # -- Additional environment variables from ConfigMaps or Secrets
+  envFrom: []
+    # - configMapRef:
+    #     name: extra-config
+    # - secretRef:
+    #     name: extra-secrets
+
+  # -- Additional volume mounts for Museum server
+  extraVolumeMounts: []
+
+  # -- Additional volumes for Museum server
+  extraVolumes: []
+
+  # -- Init containers for Museum server
+  initContainers: []
+
+  # -- Security context for Museum server container
+  securityContext: {}
+    # runAsNonRoot: true
+    # runAsUser: 65534
+    # allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem: true
+    # capabilities:
+    #   drop:
+    #     - ALL
+
+  # -- Pod security context for Museum server
+  podSecurityContext:
+    fsGroup: 65534
+    # runAsNonRoot: true
+    # seccompProfile:
+    #   type: RuntimeDefault
+
+  # -- Pod annotations for Museum server
+  podAnnotations: {}
+
+  # -- Pod labels for Museum server
+  podLabels: {}
+
+  # -- Node selector for Museum server
+  nodeSelector: {}
+
+  # -- Tolerations for Museum server
+  tolerations: []
+
+  # -- Affinity rules for Museum server
+  affinity: {}
+
+  # -- Topology spread constraints for Museum server
+  topologySpreadConstraints: []
+
+  # -- Priority class name for Museum server
+  priorityClassName: ""
+
+  # -- Termination grace period in seconds
+  terminationGracePeriodSeconds: 30
+
+  # -- Service account configuration
+  serviceAccount:
+    # -- Create service account
+    create: false
+    # -- Annotations for service account
+    annotations: {}
+    # -- Service account name
+    name: "ente-museum"
+    # -- Automount service account token
+    automount: true
+
+  # -- Update strategy for Museum deployment
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  # Persistence for Museum server
+  persistence:
+    data:
+      # -- Enable data persistence
+      enabled: false
+      # -- Storage class for data PVC
+      storageClass: ""
+      # -- Access modes for data PVC
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size for data
+      size: 1Gi
+      # -- Annotations for data PVC
+      annotations: {}
+
+  # Museum service configuration
+  service:
+    # -- Service type
+    type: ClusterIP
+    # -- Service port
+    port: 3000
+    # -- Service target port
+    targetPort: 8080
+    # -- Service annotations
+    annotations: {}
+    # -- Load balancer IP (for LoadBalancer type)
+    loadBalancerIP: ""
+    # -- Load balancer source ranges
+    loadBalancerSourceRanges: []
+    # -- External IPs
+    externalIPs: []
+    # -- Node port (for NodePort type)
+    nodePort: ""
+
+  # Museum ingress configuration
+  ingress:
+    # -- Enable ingress for Museum API
+    enabled: false
+    # -- Ingress class name
+    className: nginx
+    # -- Ingress annotations
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # -- Ingress hosts configuration
+    hosts:
+      - host: api.ente.local
+        paths:
+          - path: /
+            pathType: Prefix
+    # -- TLS configuration
+    tls: []
+      # - secretName: ente-api-tls
+      #   hosts:
+      #     - api.ente.local
+
+  # -- Startup probe configuration
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /ping
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 2
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 60 # give up and force restart after 2 minutes
+
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /ping
+      port: http
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 3
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /ping
+      port: http
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+
+
+# =============================================================================
+# WEB FRONTENDS
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Photos Web App
+# ---------------------------------------------------------------------------
+photos:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/ente-io/web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  env: []
+  envFrom: []
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: photos.ente.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: photos-tls
+    #    hosts:
+    #      - photos.ente.local
+
+  resources: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: 0
+
+  # startupProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 1
+  #   failureThreshold: 120
+  # readinessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+  # livenessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+
+# ---------------------------------------------------------------------------
+# Auth Web App
+# ---------------------------------------------------------------------------
+auth:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/ente-io/web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  env: []
+  envFrom: []
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 3003
+    targetPort: 3003
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: auth.ente.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: auth-tls
+    #    hosts:
+    #      - auth.ente.local
+
+  resources: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: 0
+
+  # startupProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 1
+  #   failureThreshold: 120
+  # readinessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+  # livenessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+
+# ---------------------------------------------------------------------------
+# Accounts Web App
+# ---------------------------------------------------------------------------
+accounts:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/ente-io/web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  env: []
+  envFrom: []
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 3001
+    targetPort: 3001
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: accounts.ente.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: accounts-tls
+    #    hosts:
+    #      - accounts.ente.local
+
+  resources: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: 0
+
+  # startupProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 1
+  #   failureThreshold: 120
+  # readinessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+  # livenessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+
+# ---------------------------------------------------------------------------
+# Cast Web App
+# ---------------------------------------------------------------------------
+cast:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: ghcr.io/ente-io/web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  env: []
+  envFrom: []
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 3004
+    targetPort: 3004
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: cast.ente.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: cast-tls
+    #    hosts:
+    #      - cast.ente.local
+
+  resources: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: 0
+
+  # startupProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 1
+  #   failureThreshold: 120
+  # readinessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+  # livenessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+
+
+# ---------------------------------------------------------------------------
+# Share Web App (Public Locker)
+# ---------------------------------------------------------------------------
+share:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/ente-io/web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  env: []
+  envFrom: []
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 3005
+    targetPort: 3005
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: share.ente.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: share-tls
+    #    hosts:
+    #      - share.ente.local
+
+  resources: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: 0
+
+  # startupProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 1
+  #   failureThreshold: 120
+  # readinessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+  # livenessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+
+# ---------------------------------------------------------------------------
+# Embed Web App
+# ---------------------------------------------------------------------------
+embed:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/ente-io/web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  env: []
+  envFrom: []
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 3006
+    targetPort: 3006
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: embed.ente.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: embed-tls
+    #    hosts:
+    #      - embed.ente.local
+
+  resources: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: 0
+
+  # startupProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 1
+  #   failureThreshold: 120
+  # readinessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+  # livenessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+
+# ---------------------------------------------------------------------------
+# Memories Web App
+# ---------------------------------------------------------------------------
+  # NOTE: The memories app is NOT included in the ghcr.io/ente-io/web Docker image.
+  # Enabling this service requires a custom image that builds and serves the memories app.
+  # See FRONTEND-ARCHITECTURE.md for details.
+memories:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: ghcr.io/ente-io/web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  env: []
+  envFrom: []
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 3010
+    targetPort: 3010
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: memories.ente.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: memories-tls
+    #    hosts:
+    #      - memories.ente.local
+
+  resources: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: 0
+
+  # startupProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 1
+  #   failureThreshold: 120
+  # readinessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+  # livenessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+
+# ---------------------------------------------------------------------------
+# Paste Web App
+# ---------------------------------------------------------------------------
+paste:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: ghcr.io/ente-io/web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  env: []
+  envFrom: []
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 3008
+    targetPort: 3008
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: paste.ente.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: paste-tls
+    #    hosts:
+    #      - paste.ente.local
+
+  resources: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: 0
+
+  # startupProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 1
+  #   failureThreshold: 120
+  # readinessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+  # livenessProbe:
+  #   httpGet:
+  #     path: /
+  #     port: 3000
+  #   periodSeconds: 5
+
+# =============================================================================
+# METRICS & MONITORING CONFIGURATION
+# =============================================================================
+metrics:
+  # -- Enable Prometheus metrics endpoint
+  enabled: false
+  # -- Metrics port
+  port: 2112
+
+  # ServiceMonitor configuration (for prometheus-operator)
+  serviceMonitor:
+    # -- Enable ServiceMonitor
+    enabled: true
+    # -- ServiceMonitor namespace (defaults to release namespace)
+    namespace: ""
+    # -- Scrape interval
+    interval: 30s
+    # -- Scrape timeout
+    scrapeTimeout: 10s
+    # -- Metrics path
+    path: /metrics
+    # -- Scheme (http or https)
+    scheme: http
+    # -- Additional labels for ServiceMonitor
+    labels: {}
+    # -- Annotations for ServiceMonitor
+    annotations: {}
+    # -- TLS configuration for ServiceMonitor
+    tlsConfig: {}
+    # -- Relabelings for ServiceMonitor
+    relabelings: []
+    # -- Metric relabelings for ServiceMonitor
+    metricRelabelings: []
+
+# Postgres Cluster
+# https://cloudnative-pg.io/
+cnpg:
+  enabled: true
+
+  # -- Init container to detect if the database is ready before starting the app
+  initContainer:
+    enabled: true
+    image: postgres:latest
+
+  cluster:
+    name: postgres-ente-photos
+
+    labels:
+    annotations:
+
+    spec:
+      instances: 1
+
+      bootstrap:
+        initdb:
+          database: ente-photos
+          owner: ente-photos
+
+      storage:
+        size: 10Gi
+
+      walStorage:
+        size: 10Gi
+
+  pooler:
+    enabled: false
+    instances: 1
+
+    labels:
+    annotations:
+
+    type: rw
+
+    pgbouncer:
+      poolMode: transaction
+      parameters:
+        max_client_conn: "1000"
+        default_pool_size: "10"
+
+  backups:
+    enabled: false
+
+    labels:
+    annotations:
+
+    schedule: "0 0 0 * * *" # every day at midnight UTC
+    retentionPolicy: "30d"
+
+    # https://cloudnative-pg.io/plugin-barman-cloud/docs/object_stores/#s3-compatible-storage-providers
+    config: {}
+      # endpointURL: https://s3.us-west-002.backblazeb2.com
+      # destinationPath: s3://pianobase-cnpg/backups/local-dev/
+      # s3Credentials:
+      #   accessKeyId:
+      #     name: cnpg-s3-creds
+      #     key: ACCESS_KEY_ID
+      #   secretAccessKey:
+      #     name: cnpg-s3-creds
+      #     key: ACCESS_SECRET_KEY
+
+extraTemplates: []

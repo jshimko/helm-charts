@@ -1,0 +1,24 @@
+{{- range $serviceName := include "services.frontendServices" $ | fromJsonArray -}}
+{{- if index $.Values $serviceName "enabled" -}}
+{{- $serviceConfig := index $.Values $serviceName -}}
+{{- if $serviceConfig.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: "ente-{{ include "services.frontendServiceName" (dict "serviceName" $serviceName "context" $) }}"
+  labels:
+    {{- include "services.frontendServiceLabels" (dict "serviceName" $serviceName "context" $) | nindent 4 }}
+spec:
+  {{- if $serviceConfig.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $serviceConfig.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if $serviceConfig.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $serviceConfig.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "services.frontendServiceSelectorLabels" (dict "serviceName" $serviceName "context" $) | nindent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}
