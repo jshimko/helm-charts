@@ -143,6 +143,17 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/hatchet-0.2.0/hatchet-0.2.0.tgz
     version: 0.2.0
+  inngest:
+  - apiVersion: v2
+    appVersion: v1.36.0
+    created: "2026-07-14T16:32:17.699387443Z"
+    description: A Helm chart for self-hosting Inngest on Kubernetes
+    digest: 267b9b96268773b288406dce6b39cf376554fccacbcba403302837ac63eaecea
+    name: inngest
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/inngest-0.2.0/inngest-0.2.0.tgz
+    version: 0.2.0
   pgo:
   - apiVersion: v2
     appVersion: 5.8.2
@@ -935,4 +946,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-14T16:27:52.728985783Z"
+generated: "2026-07-14T16:32:17.699537293Z"
