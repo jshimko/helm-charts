@@ -1,5 +1,22 @@
 apiVersion: v1
 entries:
+  ente-photos:
+  - apiVersion: v2
+    appVersion: f17f7f86
+    created: "2026-07-14T16:27:52.728870359Z"
+    description: A Helm chart for Ente Photos end-to-end encrypted photo storage
+    digest: 26e81b1cea8b6629a7f6535b8de2f475f5687c40d1384305460c613cb51767cf
+    maintainers:
+    - email: hello@jshimko.dev
+      name: jshimko
+    name: ente-photos
+    sources:
+    - https://github.com/ente-io/ente
+    - https://github.com/jshimko/helm-charts/tree/main/charts/ente-photos
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/ente-photos-0.1.0/ente-photos-0.1.0.tgz
+    version: 0.1.0
   hatchet:
   - apiVersion: v2
     appVersion: v0.71.5
@@ -918,4 +935,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2025-08-21T17:09:30.21430347Z"
+generated: "2026-07-14T16:27:52.728985783Z"
