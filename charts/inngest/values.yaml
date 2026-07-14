@@ -1,0 +1,334 @@
+# Default configuration for Inngest Self-Hosted Helm Chart
+# This file contains all configurable values with their defaults.
+# Override these values in your own values file or with --set flags.
+
+# Number of Inngest application replicas
+# When KEDA is enabled, this serves as the baseline before scaling
+replicaCount: 1
+
+# Container image configuration
+image:
+  repository: inngest/inngest # Docker image repository
+  pullPolicy: IfNotPresent # Image pull policy (Always, Never, IfNotPresent)
+  tag: "" # Image tag - defaults to Chart appVersion when empty
+
+# Secrets for pulling private images (if needed)
+imagePullSecrets: []
+
+# Kubernetes namespace configuration
+namespace:
+  create: true # Whether to create the namespace
+  name: "inngest" # Namespace name - consistent across all resources
+
+# ServiceAccount configuration
+serviceAccount:
+  create: true # Whether to create a service account
+  annotations: {} # Annotations to add to the service account
+  name: "" # Name of service account (uses default if empty)
+
+# Additional annotations for pods (e.g., for service mesh, monitoring)
+podAnnotations: {}
+
+# Pod-level security context - applies to all containers in the pod
+# These settings enhance security by running as non-root user
+podSecurityContext:
+  runAsNonRoot: true # Prevent running as root user
+  runAsUser: 1000 # Run as specific user ID
+  runAsGroup: 1000 # Run as specific group ID
+  fsGroup: 1000 # File system group for mounted volumes
+
+# Container-level security context - applies to individual containers
+# These settings provide defense-in-depth security
+securityContext:
+  allowPrivilegeEscalation: false # Prevent privilege escalation
+  readOnlyRootFilesystem: true # Make root filesystem read-only
+  runAsNonRoot: true # Enforce non-root execution
+  runAsUser: 1000 # Specific user ID
+  capabilities:
+    drop:
+      - ALL # Drop all Linux capabilities
+
+# Kubernetes Service configuration
+service:
+  type: ClusterIP # Service type (ClusterIP, NodePort, LoadBalancer)
+  port: 8288 # Main Inngest API and UI port
+  connPort: 8289 # Inngest Connect service port for function registration
+
+# Gateway API routing for external access (replaces classic Ingress)
+# Creates a ListenerSet attached to a shared Gateway, plus HTTPRoutes.
+#
+# Cluster requirements:
+# - Gateway API experimental-channel CRDs (ListenerSet)
+# - A Gateway API implementation with ListenerSet support
+#   (e.g. kgateway with KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES=true)
+# - A shared Gateway with allowedListeners.namespaces.from: All
+# - cert-manager with Gateway API support and the ListenerSets feature gate,
+#   plus a ClusterIssuer using a gatewayHTTPRoute HTTP-01 solver
+gateway:
+  enabled: false # Set to true to create the ListenerSet + HTTPRoutes
+  # Shared Gateway the ListenerSet attaches to
+  parentRef:
+    name: kgateway-shared # Gateway name
+    namespace: kgateway # Gateway namespace
+  # cert-manager ClusterIssuer that provisions the listener certificates
+  clusterIssuer: letsencrypt-gateway
+  # Extra annotations for the ListenerSet (merged after the cluster-issuer annotation)
+  annotations: {}
+  # Public hostname for the Inngest API/UI (port 8288). REQUIRED when enabled.
+  hostname: "" # e.g. inngest.example.com
+  # TLS certificate Secret that cert-manager will populate
+  tlsSecretName: "" # defaults to "inngest-tls"
+  # Emit a port-80 listener + HTTPRoute that 308-redirects to HTTPS
+  httpsRedirect: true
+  # Optional second route for the Connect gateway (port 8289, WebSocket).
+  # Only needed when Inngest Connect workers run OUTSIDE the cluster —
+  # in-cluster workers should use the Service directly (ws://inngest:8289).
+  # Workers dial wss://<connect.hostname>/v0/connect.
+  connect:
+    enabled: false
+    hostname: "" # REQUIRED when connect.enabled, e.g. inngest-connect.example.com
+    tlsSecretName: "" # defaults to "inngest-connect-tls"
+
+# Resource limits and requests for the main Inngest container
+# IMPORTANT: Set appropriate limits for production use
+resources:
+  {}
+  # limits:
+  #   cpu: 1000m
+  #   memory: 1Gi
+  # requests:
+  #   cpu: 500m
+  #   memory: 512Mi
+
+# Health probes (fully overridable - set to {} or false to disable)
+# /health is served on the main port (8288). The readiness probe uses the
+# docs-recommended `inngest alpha doctor healthcheck`, which also verifies
+# the Connect gateway (8289) is ready.
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 2
+  failureThreshold: 60 # up to 2 minutes for first boot / DB migrations
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 10
+readinessProbe:
+  exec:
+    command: ["inngest", "alpha", "doctor", "healthcheck"]
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+# Standard HPA autoscaling is disabled - use KEDA for metrics-based scaling
+
+# Node selection constraints
+nodeSelector: {}
+
+# Tolerations for node taints
+tolerations: []
+
+# Pod affinity/anti-affinity rules
+affinity: {}
+
+# Inngest application configuration
+# These values map directly to Inngest environment variables
+inngest:
+  # REQUIRED: Authentication keys for Inngest
+  eventKey: "" # Event key for sending events to Inngest (INNGEST_EVENT_KEY)
+  signingKey: "" # Signing key for validating requests (INNGEST_SIGNING_KEY)
+
+  # Optional configuration
+  config: "" # Path to Inngest configuration file (INNGEST_CONFIG)
+  host: "" # Server hostname (INNGEST_HOST)
+  port: "8288" # Server port (INNGEST_PORT)
+  sdkUrl: [] # App serve URLs for function sync (INNGEST_SDK_URL)
+
+  # Service configuration
+  connectGatewayPort: 8289 # Connect gateway port (INNGEST_CONNECT_GATEWAY_PORT)
+  connectGatewayGrpcPort: 50052 # Connect gateway internal gRPC port (INNGEST_CONNECT_GATEWAY_GRPC_PORT)
+  connectExecutorGrpcPort: 50053 # Connect executor internal gRPC port (INNGEST_CONNECT_EXECUTOR_GRPC_PORT)
+  noUI: false # Disable web UI (INNGEST_NO_UI)
+
+  # Performance tuning
+  pollInterval: 60 # Polling interval for app updates in seconds (INNGEST_POLL_INTERVAL)
+  queueWorkers: 100 # Number of executor workers (INNGEST_QUEUE_WORKERS)
+  retryInterval: 1 # Retry interval for linear backoff (INNGEST_RETRY_INTERVAL)
+  tick: 150 # Executor queue polling interval in ms (INNGEST_TICK)
+
+  # Logging configuration
+  # Sets the plain LOG_LEVEL env var - INNGEST_LOG_LEVEL is NOT honored by the
+  # server's logger. Logs are always JSON in-cluster (stdout is not a TTY).
+  logLevel: "info" # Log level: trace, debug, info, warn, error (LOG_LEVEL)
+
+  # Prometheus metrics
+  # /metrics on the main port always exposes inngest_queue_depth. Setting this
+  # to true adds per-function lifecycle counters (inngest_function_run_*_total,
+  # inngest_sdk_req_*_total) via INNGEST_EXPERIMENTAL_PROM_METRICS=1.
+  experimentalPromMetrics: false
+
+  # External database configuration
+  # Only used when the corresponding operator-managed instance is disabled
+  # (top-level postgres.enabled / redis.enabled set to false).
+  postgres:
+    # External PostgreSQL URI (INNGEST_POSTGRES_URI, stored in inngest-secret)
+    uri: ""
+    # OR reference an existing Secret containing the URI
+    uriSecretRef: {} # e.g. { name: my-postgres-creds, key: uri }
+
+    # Connection pool tuning (upstream defaults shown)
+    maxIdleConns: 10 # INNGEST_POSTGRES_MAX_IDLE_CONNS
+    maxOpenConns: 100 # INNGEST_POSTGRES_MAX_OPEN_CONNS (must be > 1)
+    connMaxIdleTime: 5 # minutes (INNGEST_POSTGRES_CONN_MAX_IDLE_TIME)
+    connMaxLifetime: 30 # minutes (INNGEST_POSTGRES_CONN_MAX_LIFETIME)
+
+  redis:
+    # External Redis URI (INNGEST_REDIS_URI, stored in inngest-secret)
+    uri: ""
+    # OR reference an existing Secret containing the URI
+    uriSecretRef: {} # e.g. { name: my-redis-creds, key: uri }
+
+  sqlite:
+    # SQLite directory (INNGEST_SQLITE_DIR), used when no Postgres is configured.
+    # /data is the chart's writable emptyDir mount - note emptyDir does not
+    # survive pod rescheduling; use Postgres for durable state.
+    dir: "" # e.g. /data
+
+# KEDA autoscaling configuration
+# Uses Prometheus sidecar to scrape Inngest metrics for scaling decisions
+keda:
+  enabled: false # Enable KEDA-based autoscaling
+  minReplicas: 1 # Minimum number of replicas
+  maxReplicas: 10 # Maximum number of replicas
+  pollingInterval: 30 # How often to check metrics (seconds)
+  cooldownPeriod: 300 # Cooldown period after scaling (seconds)
+  scaleTargetRef:
+    name: inngest # Target deployment to scale
+  triggers:
+    - type: prometheus # Use Prometheus scaler (via sidecar)
+      metadata:
+        metricName: inngest_queue_depth # Metric name for scaling
+        threshold: "10" # Scale up when > 10 items in queue
+        query: inngest_queue_depth # Prometheus query
+
+# Network policies for additional security isolation
+networkPolicy:
+  enabled: false # Enable network policies
+  ingress: [] # Custom ingress rules
+  egress: [] # Custom egress rules
+
+# Prometheus sidecar configuration (only used when keda.enabled is true)
+# This sidecar scrapes Inngest metrics and provides a Prometheus API for KEDA
+prometheus:
+  image:
+    repository: prom/prometheus # Prometheus Docker image
+    tag: "v2.45.0" # Prometheus version
+    pullPolicy: IfNotPresent
+
+  # Prometheus scrape configuration
+  scrapeInterval: "15s" # How often to scrape metrics
+  evaluationInterval: "15s" # How often to evaluate rules
+
+  # Resource limits for the Prometheus sidecar
+  # Keep these lightweight since it's only for KEDA metrics
+  resources:
+    limits:
+      cpu: 100m # CPU limit
+      memory: 128Mi # Memory limit
+    requests:
+      cpu: 50m # CPU request
+      memory: 64Mi # Memory request
+
+# Postgres Cluster
+# https://cloudnative-pg.io/
+postgres:
+  enabled: true
+
+  # dbUrlOptions: "schema=inngest"
+
+  cluster:
+    name: inngest
+
+    labels:
+    annotations:
+
+    spec:
+      instances: 1
+
+      bootstrap:
+        initdb:
+          database: inngest
+          owner: inngest
+
+      storage:
+        size: 1Gi
+
+      walStorage:
+        size: 1Gi
+
+  pooler:
+    enabled: false
+    instances: 1
+
+    labels:
+    annotations:
+
+    type: rw
+
+    pgbouncer:
+      poolMode: transaction
+      parameters:
+        max_client_conn: "1000"
+        default_pool_size: "10"
+
+  backups:
+    enabled: false
+
+    labels:
+    annotations:
+
+    schedule: "0 0 0 * * *" # every day at midnight UTC
+    retentionPolicy: "30d"
+
+    # https://cloudnative-pg.io/plugin-barman-cloud/docs/object_stores/#s3-compatible-storage-providers
+    config:
+      {}
+      # endpointURL: https://s3.us-west-002.backblazeb2.com
+      # destinationPath: s3://pianobase-cnpg/backups/local-dev/
+      # s3Credentials:
+      #   accessKeyId:
+      #     name: cnpg-s3-creds
+      #     key: ACCESS_KEY_ID
+      #   secretAccessKey:
+      #     name: cnpg-s3-creds
+      #     key: ACCESS_SECRET_KEY
+
+# Redis
+# https://ot-redis-operator.netlify.app/docs/getting-started/standalone/
+redis:
+  enabled: true
+  name: inngest-redis
+
+  labels: {}
+  annotations: {}
+
+  # https://ot-redis-operator.netlify.app/docs/crd-reference/api-reference/#redisspec
+  kubernetesConfig:
+    # https://quay.io/repository/opstree/redis?tab=tags&tag=latest
+    image: quay.io/opstree/redis:v8.2.2
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 1Gi
+  storage:
+    volumeClaimTemplate:
+      spec:
+        # storageClassName: standard
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

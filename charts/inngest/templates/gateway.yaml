@@ -1,0 +1,200 @@
+{{/*
+Inngest Gateway API Routing
+External access via the Kubernetes Gateway API instead of classic Ingress.
+
+Renders (when gateway.enabled):
+- A ListenerSet attached to a shared Gateway (gateway.parentRef). The
+  ListenerSet owns the per-host listeners (HTTPS + optional HTTP redirect)
+  and carries the cert-manager cluster-issuer annotation so certificates are
+  provisioned into the referenced Secrets automatically.
+- An HTTPRoute for the main API/UI (port 8288), plus an HTTP->HTTPS redirect
+  route when gateway.httpsRedirect is on.
+- Optionally the same pair for the Connect gateway (port 8289, WebSocket) on
+  its own hostname when gateway.connect.enabled. Workers dial
+  wss://<connect.hostname>/v0/connect.
+
+Requirements: Gateway API experimental-channel CRDs (ListenerSet), an
+implementation with ListenerSet support (e.g. kgateway with experimental
+features enabled), and cert-manager with the ListenerSets feature gate.
+
+IMPORTANT: every parentRef MUST carry explicit group + kind (+ sectionName).
+Omitting them lets the API server default the fields via server-side apply,
+which GitOps controllers (ArgoCD) detect as permanent drift.
+*/}}
+{{- if .Values.gateway.enabled }}
+{{- $hostname := required "gateway.hostname is required when gateway.enabled=true" .Values.gateway.hostname }}
+{{- $tlsSecret := .Values.gateway.tlsSecretName | default (printf "%s-tls" (include "inngest.fullname" .)) }}
+{{- $connectHostname := "" }}
+{{- $connectTlsSecret := "" }}
+{{- if .Values.gateway.connect.enabled }}
+{{- $connectHostname = required "gateway.connect.hostname is required when gateway.connect.enabled=true" .Values.gateway.connect.hostname }}
+{{- $connectTlsSecret = .Values.gateway.connect.tlsSecretName | default (printf "%s-connect-tls" (include "inngest.fullname" .)) }}
+{{- end }}
+---
+# Per-app listeners attached to the shared Gateway. cert-manager watches the
+# cluster-issuer annotation and provisions certificates into certificateRefs.
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: {{ include "inngest.fullname" . }}
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.gateway.clusterIssuer }}
+    {{- with .Values.gateway.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  parentRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: {{ .Values.gateway.parentRef.name }}
+    namespace: {{ .Values.gateway.parentRef.namespace }}
+  listeners:
+    # Main Inngest API/UI (port 8288)
+    - name: https
+      hostname: {{ $hostname }}
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ $tlsSecret }}
+            group: ""
+            kind: Secret
+    {{- if .Values.gateway.httpsRedirect }}
+    - name: http
+      hostname: {{ $hostname }}
+      port: 80
+      protocol: HTTP
+    {{- end }}
+    {{- if .Values.gateway.connect.enabled }}
+    # Connect gateway (port 8289, WebSocket)
+    - name: https-connect
+      hostname: {{ $connectHostname }}
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ $connectTlsSecret }}
+            group: ""
+            kind: Secret
+    {{- if .Values.gateway.httpsRedirect }}
+    - name: http-connect
+      hostname: {{ $connectHostname }}
+      port: 80
+      protocol: HTTP
+    {{- end }}
+    {{- end }}
+---
+# Main Inngest API/UI route
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "inngest.fullname" . }}
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+spec:
+  hostnames:
+    - {{ $hostname }}
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: {{ include "inngest.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "inngest.fullname" . }}
+          port: {{ .Values.service.port }}
+{{- if .Values.gateway.httpsRedirect }}
+---
+# HTTP -> HTTPS redirect for the main hostname
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "inngest.fullname" . }}-http
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+spec:
+  hostnames:
+    - {{ $hostname }}
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: {{ include "inngest.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      sectionName: http
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 308
+{{- end }}
+{{- if .Values.gateway.connect.enabled }}
+---
+# Connect gateway route (WebSocket - workers dial wss://<hostname>/v0/connect)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "inngest.fullname" . }}-connect
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+spec:
+  hostnames:
+    - {{ $connectHostname }}
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: {{ include "inngest.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      sectionName: https-connect
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "inngest.fullname" . }}
+          port: {{ .Values.service.connPort }}
+{{- if .Values.gateway.httpsRedirect }}
+---
+# HTTP -> HTTPS redirect for the Connect hostname
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "inngest.fullname" . }}-connect-http
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+spec:
+  hostnames:
+    - {{ $connectHostname }}
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: {{ include "inngest.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      sectionName: http-connect
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 308
+{{- end }}
+{{- end }}
+{{- end }}

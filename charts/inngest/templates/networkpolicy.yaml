@@ -1,0 +1,78 @@
+{{/*
+Inngest Network Policy
+Kubernetes NetworkPolicy for additional security isolation.
+Only created when networkPolicy.enabled is true.
+
+This network policy provides:
+- Ingress rules: Controls which traffic can reach Inngest pods
+- Egress rules: Controls which external services Inngest can access
+- Default allow rules for essential connectivity (databases, DNS, HTTPS)
+
+Network policies require a CNI plugin that supports them (e.g., Calico, Cilium, Weave Net).
+Without a compatible CNI, these policies will be ignored.
+
+Customize ingress/egress rules in values.yaml for your specific security requirements.
+*/}}
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "inngest.fullname" . }}
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+spec:
+  # Apply this policy to Inngest pods only
+  podSelector:
+    matchLabels:
+      {{- include "inngest.selectorLabels" . | nindent 6 }}
+  # Policy controls both incoming and outgoing traffic
+  policyTypes:
+    - Ingress  # Controls incoming traffic to Inngest pods
+    - Egress   # Controls outgoing traffic from Inngest pods
+  # Ingress rules - what traffic can reach Inngest pods
+  ingress:
+    {{- if .Values.networkPolicy.ingress }}
+    # Custom ingress rules from values.yaml
+    {{- toYaml .Values.networkPolicy.ingress | nindent 4 }}
+    {{- else }}
+    # Default: Allow all traffic to Inngest service ports
+    - from: []  # Empty 'from' allows traffic from any source
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.port }}     # Main Inngest API port (8288)
+        - protocol: TCP
+          port: {{ .Values.service.connPort }}   # Inngest Connect port (8289)
+        # Connect internal gRPC ports - required for multi-replica pod-to-pod
+        # gateway <-> executor coordination
+        - protocol: TCP
+          port: {{ .Values.inngest.connectGatewayGrpcPort }}
+        - protocol: TCP
+          port: {{ .Values.inngest.connectExecutorGrpcPort }}
+        {{- if .Values.keda.enabled }}
+        - protocol: TCP
+          port: 9090                           # Prometheus sidecar port
+        {{- end }}
+    {{- end }}
+  # Egress rules - what external services Inngest can access
+  egress:
+    {{- if .Values.networkPolicy.egress }}
+    # Custom egress rules from values.yaml
+    {{- toYaml .Values.networkPolicy.egress | nindent 4 }}
+    {{- else }}
+    # Default: Allow essential outbound connectivity
+    - to: []  # Empty 'to' allows traffic to any destination
+      ports:
+        - protocol: TCP
+          port: 5432   # PostgreSQL database access
+        - protocol: TCP
+          port: 6379   # Redis cache access
+        - protocol: TCP
+          port: 80     # HTTP for webhooks and API calls
+        - protocol: TCP
+          port: 443    # HTTPS for secure webhooks and API calls
+        - protocol: TCP
+          port: 53     # DNS resolution (TCP)
+        - protocol: UDP
+          port: 53     # DNS resolution (UDP)
+    {{- end }}
+{{- end }}

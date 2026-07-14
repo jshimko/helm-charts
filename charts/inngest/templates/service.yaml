@@ -1,0 +1,52 @@
+{{/*
+Inngest Service
+Kubernetes Service that exposes Inngest application ports for internal cluster communication.
+
+This service provides:
+- Port 8288: Main Inngest API, UI dashboard, and metrics endpoint
+- Port 8289: Inngest Connect service for function registration and execution
+- Ports 50052/50053: Connect internal gRPC coordination (gateway <-> executor)
+- Port 9090: Prometheus metrics (only when KEDA is enabled)
+
+The service uses ClusterIP by default for internal access. For external access,
+enable Gateway API routing (gateway.enabled) or change the service type to
+LoadBalancer/NodePort.
+*/}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "inngest.fullname" . }}
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}  # Service type (ClusterIP, NodePort, LoadBalancer)
+  ports:
+    # Main Inngest port - API, UI, webhooks, and /metrics endpoint
+    - port: {{ .Values.service.port }}    # External port (8288)
+      targetPort: http                     # Container port name
+      protocol: TCP
+      name: http
+    # Inngest Connect port - function registration and execution
+    - port: {{ .Values.service.connPort }}   # External port (8289)
+      targetPort: connect                  # Container port name
+      protocol: TCP
+      name: connect
+    # Connect internal gRPC coordination ports (gateway <-> executor routing)
+    - port: {{ .Values.inngest.connectGatewayGrpcPort }}
+      targetPort: grpc-gateway
+      protocol: TCP
+      name: grpc-gateway
+    - port: {{ .Values.inngest.connectExecutorGrpcPort }}
+      targetPort: grpc-executor
+      protocol: TCP
+      name: grpc-executor
+    {{- if .Values.keda.enabled }}
+    # Prometheus sidecar port - metrics API for KEDA (only when KEDA is enabled)
+    - port: 9090
+      targetPort: prometheus               # Container port name
+      protocol: TCP
+      name: prometheus
+    {{- end }}
+  # Route traffic to pods with matching labels
+  selector:
+    {{- include "inngest.selectorLabels" . | nindent 4 }}

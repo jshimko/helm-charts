@@ -1,0 +1,21 @@
+{{/*
+Inngest Namespace
+Kubernetes Namespace for isolating Inngest resources.
+Only created when namespace.create is true.
+
+This namespace provides:
+- Resource isolation from other applications
+- Security boundary for RBAC and network policies
+- Consistent naming across all Inngest components
+
+If you prefer to use an existing namespace, set namespace.create to false
+and ensure the target namespace exists before deploying.
+*/}}
+{{- if .Values.namespace.create }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace.name }}  # Namespace name (default: "inngest")
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+{{- end }}

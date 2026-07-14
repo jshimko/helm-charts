@@ -1,0 +1,80 @@
+{{- if .Values.redis.enabled }}
+apiVersion: redis.redis.opstreelabs.in/v1beta2
+kind: Redis
+metadata:
+  name: {{ .Values.redis.name }}
+  {{ with .Values.redis.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{ with .Values.redis.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+# https://ot-redis-operator.netlify.app/docs/crd-reference/api-reference/#redisspec
+spec:
+  podSecurityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+  kubernetesConfig:
+    {{- toYaml .Values.redis.kubernetesConfig | nindent 4 }}
+  storage:
+    {{- toYaml .Values.redis.storage | nindent 4 }}
+{{- end }}
+
+---
+# # {{- if .Values.redis.enabled }}
+# apiVersion: redis.redis.opstreelabs.in/v1beta2
+# kind: RedisReplication
+# metadata:
+#   name: redis-test
+#   namespace: preview-package-updates
+# # https://ot-redis-operator.netlify.app/docs/configuration/redisreplication/
+# spec:
+#   clusterSize: 3
+#   podSecurityContext:
+#     runAsUser: 1000
+#     fsGroup: 1000
+#   kubernetesConfig:
+#     # https://quay.io/repository/opstree/redis?tab=tags&tag=latest
+#     image: quay.io/opstree/redis:v8.2.1
+#     imagePullPolicy: IfNotPresent
+#     resources:
+#       requests:
+#         cpu: 50m
+#         memory: 128Mi
+#       limits:
+#         memory: 1Gi
+#   storage:
+#     volumeClaimTemplate:
+#       spec:
+#         # storageClassName: standard
+#         accessModes: ["ReadWriteOnce"]
+#         resources:
+#           requests:
+#             storage: 1Gi
+# # {{- end }}
+# ---
+# apiVersion: redis.redis.opstreelabs.in/v1beta2
+# kind: RedisSentinel
+# metadata:
+#   name: redis-test
+#   namespace: preview-package-updates
+# spec:
+#   clusterSize: 3
+#   podSecurityContext:
+#     runAsUser: 1000
+#     fsGroup: 1000
+#   redisSentinelConfig:
+#     redisReplicationName: redis-test # Must match the name of an existing RedisReplication resource above
+#   kubernetesConfig:
+#     # https://quay.io/repository/opstree/redis-sentinel?tab=tags&tag=latest
+#     image: quay.io/opstree/redis-sentinel:v8.2.1
+#     imagePullPolicy: IfNotPresent
+#     resources:
+#       requests:
+#         cpu: 101m
+#         memory: 128Mi
+#       limits:
+#         cpu: 101m
+#         memory: 128Mi

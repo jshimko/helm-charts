@@ -1,0 +1,6 @@
+  .git/
+  .gitignore
+  .DS_Store
+  *.tmp
+  *.log
+  inngest-local

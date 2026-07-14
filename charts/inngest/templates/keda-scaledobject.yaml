@@ -1,0 +1,70 @@
+{{/*
+KEDA Autoscaling Configuration
+This template creates KEDA resources for autoscaling Inngest based on queue metrics.
+Only deployed when keda.enabled is true.
+
+Components:
+1. Prometheus ConfigMap - Configuration for the Prometheus sidecar
+2. ScaledObject - KEDA resource that defines scaling behavior
+
+The Prometheus sidecar scrapes metrics from Inngest's /metrics endpoint
+and provides a Prometheus-compatible API that KEDA can query for scaling decisions.
+*/}}
+{{- if .Values.keda.enabled }}
+# Prometheus configuration for the sidecar container
+# This configures Prometheus to scrape Inngest metrics with authentication
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "inngest.fullname" . }}-prometheus-config
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: {{ .Values.prometheus.scrapeInterval | default "15s" }}
+      evaluation_interval: {{ .Values.prometheus.evaluationInterval | default "15s" }}
+
+    scrape_configs:
+      - job_name: 'inngest-metrics'
+        static_configs:
+          - targets: ['localhost:8288']    # Scrape from main container via localhost
+        metrics_path: '/metrics'           # Inngest metrics endpoint
+        scrape_interval: {{ .Values.prometheus.scrapeInterval | default "15s" }}
+        authorization:
+          type: Bearer                     # Use Bearer token authentication
+          credentials_file: /etc/secrets/inngest-signing-key  # Mounted from secret
+        scheme: http
+---
+# KEDA ScaledObject - Defines autoscaling behavior based on Prometheus metrics
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "inngest.fullname" . }}
+  labels:
+    {{- include "inngest.labels" . | nindent 4 }}
+spec:
+  # Target deployment to scale
+  scaleTargetRef:
+    name: {{ .Values.keda.scaleTargetRef.name | default (include "inngest.fullname" .) }}
+
+  # Scaling parameters
+  minReplicaCount: {{ .Values.keda.minReplicas }}     # Minimum pods
+  maxReplicaCount: {{ .Values.keda.maxReplicas }}     # Maximum pods
+  pollingInterval: {{ .Values.keda.pollingInterval }} # How often to check metrics (seconds)
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}   # Wait time after scaling (seconds)
+
+  # Scaling triggers - what metrics to monitor
+  triggers:
+    {{- range .Values.keda.triggers }}
+    - type: prometheus
+      metadata:
+        # Query the Prometheus sidecar (port 9090) for scaling metrics
+        serverAddress: {{ printf "http://%s.%s.svc.cluster.local:9090" (include "inngest.fullname" $) $.Values.namespace.name }}
+        {{- range $key, $value := .metadata }}
+        {{- if ne $key "serverAddress" }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,70 @@
+# Helm Chart Best Practices
+
+# Chart dependencies
+charts/
+Chart.lock
+
+# Packaged charts
+*.tgz
+
+# Helm releases and values overrides
+values-*.yaml
+values.*.yaml
+!values.yaml
+
+# Local development files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Test outputs
+test_output/
+coverage/
+
+# Security and sensitive files
+*.pem
+*.key
+*.crt
+*.p12
+secrets.yaml
+secrets-*.yaml
+
+# Helm plugin cache
+.helm/
+
+# CI/CD artifacts
+.github/workflows/test-*
+deploy/
+staging/
+production/
+
+# Claude Code files
+.claude/
+
+# Local Files
+inngest-local
+my-values.yaml
+values-internal.yaml
+values-external.yaml
+values-keda.yaml
+values-production.yaml
+values-custom-namespace.yaml
+values-existing-namespace.yaml
+values-ingress.yaml

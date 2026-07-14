@@ -1,0 +1,128 @@
+# CloudNativePG - PostgreSQL cluster, pooler, and automated backups
+# https://cloudnative-pg.io/documentation/current
+
+{{- if .Values.postgres.enabled }}
+# PostgreSQL cluster
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.postgres.cluster.name }}-postgres
+  labels:
+    {{- with .Values.postgres.cluster.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.postgres.cluster.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+# https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-ClusterSpec
+spec:
+  {{- toYaml .Values.postgres.cluster.spec | nindent 4 }}
+
+  {{- if .Values.postgres.backups.enabled }}
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: {{ .Values.postgres.cluster.name }}
+  {{- end }}
+
+---
+
+# https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-DatabaseSpec
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: {{ .Values.postgres.cluster.name }}
+  labels:
+    {{- with .Values.postgres.cluster.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.postgres.cluster.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  name: {{ .Values.postgres.cluster.spec.bootstrap.initdb.database }}
+  owner: {{ .Values.postgres.cluster.spec.bootstrap.initdb.owner }}
+  cluster:
+    name: {{ .Values.postgres.cluster.name }}-postgres
+  schemas:
+  - name: {{ .Values.postgres.cluster.spec.bootstrap.initdb.database }}
+    owner: {{ .Values.postgres.cluster.spec.bootstrap.initdb.database }}
+
+---
+
+{{- if .Values.postgres.pooler.enabled }}
+# PGBouncer
+# https://cloudnative-pg.io/documentation/current/connection_pooling/
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: {{ .Values.postgres.cluster.name }}-pgbouncer
+  labels:
+    {{- with .Values.postgres.pooler.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.postgres.pooler.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  cluster:
+    name: {{ .Values.postgres.cluster.name }}-postgres
+  instances: {{ .Values.postgres.pooler.instances }}
+  type: {{ .Values.postgres.pooler.type }}
+  pgbouncer:
+    {{- toYaml .Values.postgres.pooler.pgbouncer | nindent 4 }}
+{{- end }}
+
+{{- end }}
+
+---
+
+# Backups
+{{- if .Values.postgres.backups.enabled }}
+# S3 compatible storage
+# https://cloudnative-pg.io/plugin-barman-cloud/docs/object_stores/#s3-compatible-storage-providers
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: {{ .Values.postgres.cluster.name }}
+  labels:
+    {{- with .Values.postgres.backups.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.postgres.backups.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  retentionPolicy: {{ .Values.postgres.backups.retentionPolicy }}
+  configuration:
+    {{- toYaml .Values.postgres.backups.config | nindent 4 }}
+
+---
+
+# https://cloudnative-pg.io/documentation/current/backup/
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ .Values.postgres.cluster.name }}
+  labels:
+    {{- with .Values.postgres.backups.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.postgres.backups.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  method: plugin
+  cluster:
+    name: {{ .Values.postgres.cluster.name }}
+  backupOwnerReference: self
+  schedule: {{ .Values.postgres.backups.schedule | quote }}
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+{{- end }}
