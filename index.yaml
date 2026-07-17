@@ -145,6 +145,16 @@ entries:
     version: 0.2.0
   inngest:
   - apiVersion: v2
+    appVersion: v1.37.0
+    created: "2026-07-17T13:30:51.70908703Z"
+    description: A Helm chart for self-hosting Inngest on Kubernetes
+    digest: 529324251c178f5fa9ed241ba530d71a6dbc040e427a69c373d5f80a1561871f
+    name: inngest
+    type: application
+    urls:
+    - https://github.com/jshimko/helm-charts/releases/download/inngest-0.3.0/inngest-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     appVersion: v1.36.0
     created: "2026-07-14T16:32:17.699387443Z"
     description: A Helm chart for self-hosting Inngest on Kubernetes
@@ -946,4 +956,4 @@ entries:
     urls:
     - https://github.com/jshimko/helm-charts/releases/download/svix-0.1.0/svix-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-14T16:32:17.699537293Z"
+generated: "2026-07-17T13:30:51.709202372Z"
