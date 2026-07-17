@@ -26,6 +26,9 @@ serviceAccount:
   annotations: {} # Annotations to add to the service account
   name: "" # Name of service account (uses default if empty)
 
+# Inngest deployment annotations
+annotations: {}
+
 # Additional annotations for pods (e.g., for service mesh, monitoring)
 podAnnotations: {}
 
@@ -135,9 +138,14 @@ affinity: {}
 # Inngest application configuration
 # These values map directly to Inngest environment variables
 inngest:
-  # REQUIRED: Authentication keys for Inngest
+  # REQUIRED: Authentication keys for Inngest.
+  # Must be set here or in custom env/envFrom below!
   eventKey: "" # Event key for sending events to Inngest (INNGEST_EVENT_KEY)
   signingKey: "" # Signing key for validating requests (INNGEST_SIGNING_KEY)
+
+  # custom env for Inngest deployment
+  env: []
+  envFrom: []
 
   # Optional configuration
   config: "" # Path to Inngest configuration file (INNGEST_CONFIG)

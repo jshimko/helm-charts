@@ -15,6 +15,10 @@ metadata:
   name: {{ include "inngest.fullname" . }}
   labels:
     {{- include "inngest.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.keda.enabled }}
   # Static replica count when KEDA is disabled
@@ -92,6 +96,10 @@ spec:
           env:
             - name: INNGEST_DEV
               value: "0"
+
+            # telemetry opt-out
+            - name: DO_NOT_TRACK
+              value: "1"
 
             # Server configuration
             {{- if .Values.inngest.config }}
@@ -191,10 +199,19 @@ spec:
               value: {{ .Values.inngest.sqlite.dir | quote }}
             {{- end }}
 
+          # additional custom env
+          {{- with .Values.inngest.env }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
           envFrom:
             # Sensitive configuration (event keys, signing keys)
             - secretRef:
                 name: inngest-secret
+            # additional custom envFrom
+          {{- with .Values.inngest.envFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
 
           {{- with .Values.startupProbe }}
           startupProbe:
